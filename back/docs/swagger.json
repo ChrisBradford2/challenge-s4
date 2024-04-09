@@ -1,0 +1,26 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "description": "get string",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get hello",
+                "operationId": "get-string",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
