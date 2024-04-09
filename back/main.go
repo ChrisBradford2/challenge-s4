@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/madkins23/gin-utils/pkg/ginzero"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,9 +15,19 @@ import (
 	"os"
 )
 
+// @title     Gingo Bookstore API
+// @Summary Get hello
+// @Description get string
+// @ID get-string
+// @Produce  json
+// @Success 200 {string} string	"ok"
+// @Router / [get]
 func main() {
 	r := gin.New()
 	r.Use(ginzero.Logger())
+
+	// Swagger
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	//connexion bd
 	err := godotenv.Load()
