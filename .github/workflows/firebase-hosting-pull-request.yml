@@ -14,6 +14,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: cd front
+
+      - name: Set working directory
+        run: cd front
+
+      # Note: This workflow uses the latest stable version of the Dart SDK.
+      # You can specify other versions if desired, see documentation here:
+      # https://github.com/dart-lang/setup-dart/blob/main/README.md
+      # - uses: dart-lang/setup-dart@v1
+      - uses: MobileDevOps/flutter-sdk-action@v1.0.0
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ./front
+
+      - name: Build project
+        run: flutter build web
+        working-directory: ./front
+
+      - run: ls front/build/web
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
