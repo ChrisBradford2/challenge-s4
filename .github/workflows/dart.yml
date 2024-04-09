@@ -46,3 +46,13 @@ jobs:
       - name: Run tests
         run: flutter test
         working-directory: ./front
+
+      - name: Build web
+        run: flutter build web
+        working-directory: ./front
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact
+          path: front/build/web/
