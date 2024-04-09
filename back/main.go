@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/madkins23/gin-utils/pkg/ginzero"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+	r := gin.New()
+	r.Use(ginzero.Logger())
 
 	//connexion bd
 	err := godotenv.Load()
@@ -32,7 +35,7 @@ func main() {
 	log.Println("Connexion à la base de données réussie !")
 
 	// Automatiser la migration de la base de données
-	err = db.AutoMigrate(&models.Utilisateur{})
+	err = db.AutoMigrate(&models.User{})
 	if err != nil {
 		log.Fatal("Erreur lors de la migration de la base de données:", err)
 	}
@@ -47,7 +50,7 @@ func main() {
 		fmt.Println("Erreur lors du hachage du mot de passe:", err)
 		return
 	}
-	nouvelUtilisateur := models.Utilisateur{Nom: "Dupont", Prenom: "Alice", Login: "aliced", Password: string(hashedPassword)}
+	nouvelUtilisateur := models.User{Nom: "Dupont", Prenom: "Alice", Login: "aliced", Password: string(hashedPassword)}
 	db.Create(&nouvelUtilisateur)
 	//connexion bd
 
@@ -58,5 +61,13 @@ func main() {
 			"message": "Hello, Gin!",
 		})
 	})
-	router.Run(":8080")
+	r.GET("/", func(c *gin.Context) {
+		c.String(200, "hello, gin-zerolog example")
+	})
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
+
+	r.Run(":8080")
 }
