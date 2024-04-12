@@ -4,11 +4,12 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	ID       uint `gorm:"not null"`
-	Nom      string
-	Prenom   string
-	Login    string `gorm:"not null"`
-	Email    string
-	Password string `gorm:"not null"`
-	// Ajoutez d'autres champs selon votre structure de base de données
+	Username  string `gorm:"unique"`
+	LastName  string
+	FirstName string
+	Email     string `gorm:"unique"`
+	Password  string `gorm:"not null"`
+	TeamID    uint   // Foreign key referencing Team.ID
+	Team      Team   // Belongs to Team
+	Roles     uint8  // 0 = user, 2 = organizer, 4 = admin
 }
