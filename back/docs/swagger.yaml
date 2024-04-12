@@ -1,16 +1,140 @@
+basePath: /
+definitions:
+  models.Hackathon:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      maxParticipants:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.HackathonCreate:
+    properties:
+      description:
+        example: Un événement pour les développeurs
+        type: string
+      location:
+        example: Paris
+        type: string
+      maxParticipants:
+        example: 100
+        type: integer
+      name:
+        example: Hackathon de Paris
+        type: string
+    type: object
 info:
   contact: {}
+  description: Swagger API for the Kiwi Collective project.
+  title: Kiwi Collective API
+  version: "1.0"
 paths:
-  /:
+  /hackathons:
     get:
-      description: get string
-      operationId: get-string
+      description: Récupère une liste de tous les hackathons
       produces:
       - application/json
       responses:
         "200":
-          description: ok
+          description: OK
           schema:
-            type: string
-      summary: Get hello
+            items:
+              $ref: '#/definitions/models.Hackathon'
+            type: array
+      summary: Lire tous les hackathons
+      tags:
+      - hackathons
+    post:
+      consumes:
+      - application/json
+      description: Ajoute un nouveau hackathon à la base de données
+      parameters:
+      - description: Hackathon à créer
+        in: body
+        name: hackathon
+        required: true
+        schema:
+          $ref: '#/definitions/models.HackathonCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Hackathon'
+      summary: Créer un hackathon
+      tags:
+      - hackathons
+  /hackathons/{id}:
+    delete:
+      description: Supprime un hackathon par son ID
+      parameters:
+      - description: ID du Hackathon
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: true si la suppression est réussie
+          schema:
+            type: boolean
+      summary: Supprimer un hackathon
+      tags:
+      - hackathons
+    get:
+      description: Récupère un hackathon par son ID
+      parameters:
+      - description: ID du Hackathon
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Hackathon'
+      summary: Lire un hackathon spécifique
+      tags:
+      - hackathons
+    put:
+      consumes:
+      - application/json
+      description: Met à jour les informations d'un hackathon par son ID
+      parameters:
+      - description: ID du Hackathon
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Informations du Hackathon à mettre à jour
+        in: body
+        name: hackathon
+        required: true
+        schema:
+          $ref: '#/definitions/models.Hackathon'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Hackathon'
+      summary: Mettre à jour un hackathon
+      tags:
+      - hackathons
 swagger: "2.0"
