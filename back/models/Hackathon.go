@@ -8,4 +8,7 @@ type Hackathon struct {
 	Nom       string
 	Location  string
 	CreatedBy User `gorm:"foreignKey:ID"`
+	Teams     []Team
+	StartDate string
+	EndDate   string
 }
