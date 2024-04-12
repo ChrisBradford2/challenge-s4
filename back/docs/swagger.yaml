@@ -34,8 +34,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Ceci est un exemple de serveur API Hackathon.
-  title: BananaGang API
+  description: Swagger API for the Kiwi Collective project.
+  title: Kiwi Collective API
   version: "1.0"
 paths:
   /hackathons:

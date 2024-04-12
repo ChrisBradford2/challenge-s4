@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Ceci est un exemple de serveur API Hackathon.",
-        "title": "BananaGang API",
+        "description": "Swagger API for the Kiwi Collective project.",
+        "title": "Kiwi Collective API",
         "contact": {},
         "version": "1.0"
     },

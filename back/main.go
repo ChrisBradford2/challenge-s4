@@ -38,13 +38,13 @@ func connectDatabase() (*gorm.DB, error) {
 	return nil, fmt.Errorf("failed to connect to the database after 5 attempts")
 }
 
-// @title BananaGang API
-// @description Ceci est un exemple de serveur API Hackathon.
+// @title Kiwi Collective API
+// @description Swagger API for the Kiwi Collective project.
 // @version 1.0
 // @BasePath /
 func main() {
-	docs.SwaggerInfo.Title = "BananaGang API"
-	docs.SwaggerInfo.Description = "Documentation de l'API pour les Hackathons."
+	docs.SwaggerInfo.Title = "Kiwi Collective API"
+	docs.SwaggerInfo.Description = "API for the Kiwi Collective project."
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
