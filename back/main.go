@@ -79,7 +79,7 @@ func main() {
 		fmt.Println("Failed to hash the password: ", err)
 		return
 	}
-	nouvelUtilisateur := models.User{Nom: "Dupont", Prenom: "Alice", Login: "aliced", Password: string(hashedPassword)}
+	nouvelUtilisateur := models.User{LastName: "Dupont", FirstName: "Alice", Username: "aliced", Password: string(hashedPassword)}
 	db.Create(&nouvelUtilisateur)
 	// Create a new user
 
