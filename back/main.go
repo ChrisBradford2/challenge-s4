@@ -10,7 +10,6 @@ import (
 	"github.com/madkins23/gin-utils/pkg/ginzero"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -70,33 +69,12 @@ func main() {
 	}
 
 	log.Println("Database migrated !")
-	// Password hashing
-	password := "test1234"
 
-	// Hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		fmt.Println("Failed to hash the password: ", err)
-		return
-	}
-	nouvelUtilisateur := models.User{LastName: "Dupont", FirstName: "Alice", Username: "aliced", Password: string(hashedPassword)}
-	db.Create(&nouvelUtilisateur)
-	// Create a new user
-
-	router := gin.Default()
-
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello, Gin!",
-		})
-	})
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "hello, gin-zerolog example")
 	})
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(200, "pong")
-	})
+	routes.UserRoutes(r, db)
 
 	routes.HackathonRoutes(r, db)
 	if err := db.AutoMigrate(&models.Hackathon{}); err != nil {

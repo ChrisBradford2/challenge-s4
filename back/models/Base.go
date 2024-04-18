@@ -8,3 +8,7 @@ type Base struct {
 	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `json:"deletedAt" gorm:"index"`
 }
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
