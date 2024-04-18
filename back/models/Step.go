@@ -1,12 +1,11 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 type Step struct {
-	gorm.Model
+	Base
 	Note         uint8
 	Status       string
 	DeadLineDate time.Time
