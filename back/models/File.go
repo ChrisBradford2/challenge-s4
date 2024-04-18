@@ -4,6 +4,7 @@ import "time"
 
 type File struct {
 	Base
+	UserID       string    `json:"userId"`       // User ID
 	Name         string    `json:"name"`         // Filename
 	Size         int64     `json:"size"`         // File size in bytes
 	ContentType  string    `json:"contentType"`  // File content type
