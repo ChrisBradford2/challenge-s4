@@ -11,4 +11,5 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/main .
 COPY .env ./
+COPY hackaton-gcs.json ./
 CMD ["./main"]

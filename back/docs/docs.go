@@ -164,6 +164,47 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/upload": {
+            "post": {
+                "description": "Uploads a file to Google Cloud Storage",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Upload a file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File uploaded successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -173,7 +214,16 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
+                "createdBy": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
                 "description": {
+                    "type": "string"
+                },
+                "endDate": {
                     "type": "string"
                 },
                 "id": {
@@ -187,6 +237,15 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Team"
+                    }
                 },
                 "updatedAt": {
                     "type": "string"
@@ -211,6 +270,132 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Hackathon de Paris"
+                }
+            }
+        },
+        "models.Registration": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "team": {
+                    "description": "Belongs to Team",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Team"
+                        }
+                    ]
+                },
+                "teamID": {
+                    "description": "Foreign key referencing Team.ID",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "description": "Belongs to User",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    ]
+                },
+                "userID": {
+                    "description": "Foreign key referencing User.ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Team": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "registrations": {
+                    "description": "Has many Registrations",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Registration"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "users": {
+                    "description": "Has many Users",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "roles": {
+                    "description": "0 = user, 2 = organizer, 4 = admin",
+                    "type": "integer"
+                },
+                "team": {
+                    "description": "Belongs to Team",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Team"
+                        }
+                    ]
+                },
+                "teamID": {
+                    "description": "Foreign key referencing Team.ID",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

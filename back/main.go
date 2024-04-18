@@ -103,6 +103,9 @@ func main() {
 		log.Fatal("Failed to migrate the database: ", err)
 	}
 
+	// File upload
+	routes.FileRoutes(r, os.Getenv("GCP_CREDS"))
+
 	// Swagger
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

@@ -4,7 +4,13 @@ definitions:
     properties:
       createdAt:
         type: string
+      createdBy:
+        $ref: '#/definitions/models.User'
+      deletedAt:
+        type: string
       description:
+        type: string
+      endDate:
         type: string
       id:
         type: integer
@@ -14,6 +20,12 @@ definitions:
         type: integer
       name:
         type: string
+      startDate:
+        type: string
+      teams:
+        items:
+          $ref: '#/definitions/models.Team'
+        type: array
       updatedAt:
         type: string
     type: object
@@ -30,6 +42,87 @@ definitions:
         type: integer
       name:
         example: Hackathon de Paris
+        type: string
+    type: object
+  models.Registration:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      team:
+        allOf:
+        - $ref: '#/definitions/models.Team'
+        description: Belongs to Team
+      teamID:
+        description: Foreign key referencing Team.ID
+        type: integer
+      updatedAt:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Belongs to User
+      userID:
+        description: Foreign key referencing User.ID
+        type: integer
+    type: object
+  models.Team:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      registrations:
+        description: Has many Registrations
+        items:
+          $ref: '#/definitions/models.Registration'
+        type: array
+      updatedAt:
+        type: string
+      users:
+        description: Has many Users
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      password:
+        type: string
+      roles:
+        description: 0 = user, 2 = organizer, 4 = admin
+        type: integer
+      team:
+        allOf:
+        - $ref: '#/definitions/models.Team'
+        description: Belongs to Team
+      teamID:
+        description: Foreign key referencing Team.ID
+        type: integer
+      updatedAt:
+        type: string
+      username:
         type: string
     type: object
 info:
@@ -137,4 +230,31 @@ paths:
       summary: Mettre à jour un hackathon
       tags:
       - hackathons
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file to Google Cloud Storage
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: File uploaded successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Upload a file
+      tags:
+      - files
 swagger: "2.0"
