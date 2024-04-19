@@ -1,12 +1,17 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Swagger API for the Kiwi Collective project.",
-        "title": "Kiwi Collective API",
-        "contact": {},
-        "version": "1.0"
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
     },
-    "basePath": "/",
     "paths": {
         "/files": {
             "get": {
@@ -43,7 +48,7 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Récupère une liste de tous les hackathons",
@@ -69,7 +74,7 @@
             "post": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Ajoute un nouveau hackathon à la base de données",
@@ -108,7 +113,7 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Récupère un hackathon par son ID",
@@ -140,7 +145,7 @@
             "put": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Met à jour les informations d'un hackathon par son ID",
@@ -184,7 +189,7 @@
             "delete": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Supprime un hackathon par son ID",
@@ -629,6 +634,14 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Bearer token",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

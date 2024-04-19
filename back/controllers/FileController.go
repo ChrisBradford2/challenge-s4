@@ -16,7 +16,7 @@ import (
 // @Tags files
 // @Accept multipart/form-data
 // @Param file formData file true "File to upload"
-// @Security Bearer
+// @Security ApiKeyAuth
 // @Success 200 {string} string "File uploaded successfully"
 // @Failure 400 {object} string "Invalid request"
 // @Failure 500 {object} string "Internal server error"

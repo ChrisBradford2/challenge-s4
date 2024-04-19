@@ -13,7 +13,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param hackathon body models.HackathonCreate true "Hackathon à créer"
-// @Security Bearer
+// @Security ApiKeyAuth
 // @Success 201 {object} models.Hackathon
 // @Router /hackathons [post]
 func CreateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -27,7 +27,7 @@ func CreateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Description Récupère une liste de tous les hackathons
 // @Tags hackathons
 // @Produce  json
-// @Security Bearer
+// @Security ApiKeyAuth
 // @Success 200 {array} models.Hackathon
 // @Router /hackathons [get]
 func GetHackathonsHandler(db *gorm.DB) gin.HandlerFunc {
@@ -42,7 +42,7 @@ func GetHackathonsHandler(db *gorm.DB) gin.HandlerFunc {
 // @Tags hackathons
 // @Produce  json
 // @Param id path int true "ID du Hackathon"
-// @Security Bearer
+// @Security ApiKeyAuth
 // @Success 200 {object} models.Hackathon
 // @Router /hackathons/{id} [get]
 func GetHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -59,7 +59,7 @@ func GetHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Produce  json
 // @Param id path int true "ID du Hackathon"
 // @Param hackathon body models.Hackathon true "Informations du Hackathon à mettre à jour"
-// @Security Bearer
+// @Security ApiKeyAuth
 // @Success 200 {object} models.Hackathon
 // @Router /hackathons/{id} [put]
 func UpdateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -74,7 +74,7 @@ func UpdateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Tags hackathons
 // @Produce  json
 // @Param id path int true "ID du Hackathon"
-// @Security Bearer
+// @Security ApiKeyAuth
 // @Success 200 {object} bool "true si la suppression est réussie"
 // @Router /hackathons/{id} [delete]
 func DeleteHackathonHandler(db *gorm.DB) gin.HandlerFunc {
