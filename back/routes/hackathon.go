@@ -13,6 +13,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param hackathon body models.HackathonCreate true "Hackathon à créer"
+// @Security Bearer
 // @Success 201 {object} models.Hackathon
 // @Router /hackathons [post]
 func CreateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -26,6 +27,7 @@ func CreateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Description Récupère une liste de tous les hackathons
 // @Tags hackathons
 // @Produce  json
+// @Security Bearer
 // @Success 200 {array} models.Hackathon
 // @Router /hackathons [get]
 func GetHackathonsHandler(db *gorm.DB) gin.HandlerFunc {
@@ -40,6 +42,7 @@ func GetHackathonsHandler(db *gorm.DB) gin.HandlerFunc {
 // @Tags hackathons
 // @Produce  json
 // @Param id path int true "ID du Hackathon"
+// @Security Bearer
 // @Success 200 {object} models.Hackathon
 // @Router /hackathons/{id} [get]
 func GetHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -56,6 +59,7 @@ func GetHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Produce  json
 // @Param id path int true "ID du Hackathon"
 // @Param hackathon body models.Hackathon true "Informations du Hackathon à mettre à jour"
+// @Security Bearer
 // @Success 200 {object} models.Hackathon
 // @Router /hackathons/{id} [put]
 func UpdateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -70,6 +74,7 @@ func UpdateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Tags hackathons
 // @Produce  json
 // @Param id path int true "ID du Hackathon"
+// @Security Bearer
 // @Success 200 {object} bool "true si la suppression est réussie"
 // @Router /hackathons/{id} [delete]
 func DeleteHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -80,11 +85,13 @@ func DeleteHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 
 func HackathonRoutes(r *gin.Engine, db *gorm.DB) {
 	hackathonGroup := r.Group("/hackathons")
+	hackathonGroup.Use(middleware.AuthMiddleware(0))
+
 	{
-		hackathonGroup.POST("/", CreateHackathonHandler(db))
+		hackathonGroup.POST("/", middleware.AuthMiddleware(2), CreateHackathonHandler(db))
 		hackathonGroup.GET("/", GetHackathonsHandler(db))
 		hackathonGroup.GET("/:id", GetHackathonHandler(db))
-		hackathonGroup.PUT("/:id", UpdateHackathonHandler(db))
-		hackathonGroup.DELETE("/:id", DeleteHackathonHandler(db))
+		hackathonGroup.PUT("/:id", middleware.AuthMiddleware(2), UpdateHackathonHandler(db))
+		hackathonGroup.DELETE("/:id", middleware.AuthMiddleware(2), DeleteHackathonHandler(db))
 	}
 }

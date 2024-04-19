@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
   models.Hackathon:
     properties:
       createdAt:
@@ -22,10 +27,6 @@ definitions:
         type: string
       startDate:
         type: string
-      teams:
-        items:
-          $ref: '#/definitions/models.Team'
-        type: array
       updatedAt:
         type: string
     type: object
@@ -80,6 +81,7 @@ definitions:
       id:
         type: integer
       name:
+        example: Team 1
         type: string
       registrations:
         description: Has many Registrations
@@ -93,6 +95,8 @@ definitions:
         items:
           $ref: '#/definitions/models.User'
         type: array
+    required:
+    - name
     type: object
   models.User:
     properties:
@@ -101,26 +105,81 @@ definitions:
       deletedAt:
         type: string
       email:
+        example: john.doe@exmple.com
         type: string
-      firstName:
+      first_name:
+        example: John
         type: string
       id:
         type: integer
-      lastName:
+      last_name:
+        example: Doe
         type: string
       password:
+        example: password
         type: string
       roles:
         description: 0 = user, 2 = organizer, 4 = admin
+        example: 0
         type: integer
       team:
         allOf:
         - $ref: '#/definitions/models.Team'
         description: Belongs to Team
-      teamID:
+      team_id:
         description: Foreign key referencing Team.ID
         type: integer
       updatedAt:
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - username
+    type: object
+  models.UserLogin:
+    properties:
+      email:
+        example: john.doe@exmple.com
+        type: string
+      password:
+        example: password
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.UserRegister:
+    properties:
+      email:
+        example: john.doe@exmple.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      last_name:
+        example: Doe
+        type: string
+      password:
+        example: password
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - username
+    type: object
+  models.UserRegisterResponse:
+    properties:
+      email:
         type: string
       username:
         type: string
@@ -131,6 +190,25 @@ info:
   title: Kiwi Collective API
   version: "1.0"
 paths:
+  /files:
+    get:
+      description: Get a list of files uploaded by the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of files
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Get files
+      tags:
+      - files
   /hackathons:
     get:
       description: Récupère une liste de tous les hackathons
@@ -143,6 +221,8 @@ paths:
             items:
               $ref: '#/definitions/models.Hackathon'
             type: array
+      security:
+      - Bearer: []
       summary: Lire tous les hackathons
       tags:
       - hackathons
@@ -164,6 +244,8 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/models.Hackathon'
+      security:
+      - Bearer: []
       summary: Créer un hackathon
       tags:
       - hackathons
@@ -183,6 +265,8 @@ paths:
           description: true si la suppression est réussie
           schema:
             type: boolean
+      security:
+      - Bearer: []
       summary: Supprimer un hackathon
       tags:
       - hackathons
@@ -201,6 +285,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Hackathon'
+      security:
+      - Bearer: []
       summary: Lire un hackathon spécifique
       tags:
       - hackathons
@@ -227,6 +313,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Hackathon'
+      security:
+      - Bearer: []
       summary: Mettre à jour un hackathon
       tags:
       - hackathons
@@ -254,7 +342,73 @@ paths:
           description: Internal server error
           schema:
             type: string
+      security:
+      - Bearer: []
       summary: Upload a file
       tags:
       - files
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Login
+      tags:
+      - auth
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRegister'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered
+          schema:
+            $ref: '#/definitions/models.UserRegisterResponse'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Register
+      tags:
+      - auth
 swagger: "2.0"

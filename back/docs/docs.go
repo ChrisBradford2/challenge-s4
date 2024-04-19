@@ -15,8 +15,44 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/files": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get a list of files uploaded by the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Get files",
+                "responses": {
+                    "200": {
+                        "description": "List of files",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/hackathons": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Récupère une liste de tous les hackathons",
                 "produces": [
                     "application/json"
@@ -38,6 +74,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Ajoute un nouveau hackathon à la base de données",
                 "consumes": [
                     "application/json"
@@ -72,6 +113,11 @@ const docTemplate = `{
         },
         "/hackathons/{id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Récupère un hackathon par son ID",
                 "produces": [
                     "application/json"
@@ -99,6 +145,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Met à jour les informations d'un hackathon par son ID",
                 "consumes": [
                     "application/json"
@@ -138,6 +189,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Supprime un hackathon par son ID",
                 "produces": [
                     "application/json"
@@ -167,6 +223,11 @@ const docTemplate = `{
         },
         "/upload": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Uploads a file to Google Cloud Storage",
                 "consumes": [
                     "multipart/form-data"
@@ -205,9 +266,115 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/login": {
+            "post": {
+                "description": "Logs in a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "User credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/register": {
+            "post": {
+                "description": "Registers a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register",
+                "parameters": [
+                    {
+                        "description": "User object",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserRegister"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User registered",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserRegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Hackathon": {
             "type": "object",
             "properties": {
@@ -240,12 +407,6 @@ const docTemplate = `{
                 },
                 "startDate": {
                     "type": "string"
-                },
-                "teams": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Team"
-                    }
                 },
                 "updatedAt": {
                     "type": "string"
@@ -319,6 +480,9 @@ const docTemplate = `{
         },
         "models.Team": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "createdAt": {
                     "type": "string"
@@ -330,7 +494,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Team 1"
                 },
                 "registrations": {
                     "description": "Has many Registrations",
@@ -353,6 +518,13 @@ const docTemplate = `{
         },
         "models.User": {
             "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "password",
+                "username"
+            ],
             "properties": {
                 "createdAt": {
                     "type": "string"
@@ -361,23 +533,28 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john.doe@exmple.com"
                 },
-                "firstName": {
-                    "type": "string"
+                "first_name": {
+                    "type": "string",
+                    "example": "John"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "lastName": {
-                    "type": "string"
+                "last_name": {
+                    "type": "string",
+                    "example": "Doe"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
                 },
                 "roles": {
                     "description": "0 = user, 2 = organizer, 4 = admin",
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "team": {
                     "description": "Belongs to Team",
@@ -387,11 +564,72 @@ const docTemplate = `{
                         }
                     ]
                 },
-                "teamID": {
+                "team_id": {
                     "description": "Foreign key referencing Team.ID",
                     "type": "integer"
                 },
                 "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "jdoe"
+                }
+            }
+        },
+        "models.UserLogin": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@exmple.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password"
+                }
+            }
+        },
+        "models.UserRegister": {
+            "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@exmple.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "jdoe"
+                }
+            }
+        },
+        "models.UserRegisterResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
                     "type": "string"
                 },
                 "username": {

@@ -39,6 +39,7 @@ func connectDatabase() (*gorm.DB, error) {
 
 // @title Kiwi Collective API
 // @description Swagger API for the Kiwi Collective project.
+// @securityDefinitions.api_key Bearer
 // @version 1.0
 // @BasePath /
 func main() {
