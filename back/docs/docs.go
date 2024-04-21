@@ -28,7 +28,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Get a list of files uploaded by the user",
@@ -234,7 +234,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Uploads a file to Google Cloud Storage",

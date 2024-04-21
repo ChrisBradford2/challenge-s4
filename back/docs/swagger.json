@@ -17,7 +17,7 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Get a list of files uploaded by the user",
@@ -223,7 +223,7 @@
             "post": {
                 "security": [
                     {
-                        "Bearer": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Uploads a file to Google Cloud Storage",

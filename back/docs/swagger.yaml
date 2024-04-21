@@ -208,7 +208,7 @@ paths:
           schema:
             type: string
       security:
-      - Bearer: []
+      - ApiKeyAuth: []
       summary: Get files
       tags:
       - files
@@ -346,7 +346,7 @@ paths:
           schema:
             type: string
       security:
-      - Bearer: []
+      - ApiKeyAuth: []
       summary: Upload a file
       tags:
       - files
