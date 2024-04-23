@@ -8,6 +8,9 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // UploadFile godoc
@@ -22,6 +25,23 @@ import (
 // @Failure 500 {object} string "Internal server error"
 // @Router /upload [post]
 func UploadFile(c *gin.Context, storageService *services.StorageService) {
+	token := c.GetHeader("Authorization") // Get token from header
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
+		return
+	}
+
+	// Delete "Bearer " from the token
+	if len(token) > 7 && strings.ToUpper(token[:7]) == "BEARER " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -39,6 +59,12 @@ func UploadFile(c *gin.Context, storageService *services.StorageService) {
 	objectName := header.Filename
 
 	wc := storageService.Client.Bucket(bucketName).Object(objectName).NewWriter(ctx)
+
+	wc.Metadata = map[string]string{
+		"userID":     strconv.Itoa(int(userID)),
+		"uploadTime": time.Now().Format(time.RFC3339),
+	}
+
 	if _, err = io.Copy(wc, file); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

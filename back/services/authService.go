@@ -38,3 +38,17 @@ func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
+
+// GetUserIDFromToken extracts the user ID from the JWT token
+func GetUserIDFromToken(tokenString string) (uint, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return config.JWTSecret, nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID := uint(claims["userId"].(float64))
+		return userID, nil
+	} else {
+		return 0, err
+	}
+}
