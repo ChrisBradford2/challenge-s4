@@ -16,4 +16,7 @@ func FileRoutes(r *gin.Engine, credentialsFile string) {
 		func(c *gin.Context) {
 			controllers.UploadFile(c, storageService)
 		})
+	r.GET("/files/me", middleware.AuthMiddleware(0), func(c *gin.Context) {
+		controllers.GetMyFiles(c, storageService)
+	})
 }

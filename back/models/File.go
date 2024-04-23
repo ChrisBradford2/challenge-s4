@@ -13,3 +13,9 @@ type File struct {
 	LastModified time.Time `json:"lastModified"`                 // Last modified date
 	URL          string    `json:"url"`                          // URL to download the file from Google Cloud Storage
 }
+
+type FileInfo struct {
+	Name       string `json:"name"`
+	UploadTime string `json:"upload_time"`
+	URL        string `json:"url"`
+}

@@ -13,24 +13,27 @@
         }
     },
     "paths": {
-        "/files": {
+        "/files/me": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a list of files uploaded by the user",
-                "produces": [
-                    "application/json"
-                ],
+                "description": "Get all files uploaded by the user from Google Cloud Storage",
                 "tags": [
                     "files"
                 ],
-                "summary": "Get files",
+                "summary": "Get all files uploaded by the user",
                 "responses": {
                     "200": {
                         "description": "List of files",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }

@@ -193,14 +193,16 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
 paths:
-  /files:
+  /files/me:
     get:
-      description: Get a list of files uploaded by the user
-      produces:
-      - application/json
+      description: Get all files uploaded by the user from Google Cloud Storage
       responses:
         "200":
           description: List of files
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "500":
@@ -209,7 +211,7 @@ paths:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: Get files
+      summary: Get all files uploaded by the user
       tags:
       - files
   /hackathons:
