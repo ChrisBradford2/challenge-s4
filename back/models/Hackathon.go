@@ -1,8 +1,8 @@
 package models
 
 import (
+	"gorm.io/gorm"
 	"time"
-  "gorm.io/gorm"
 )
 
 type Base struct {
@@ -18,8 +18,8 @@ type Hackathon struct {
 	Description     string `json:"description"`
 	Location        string `json:"location"`
 	MaxParticipants int    `json:"maxParticipants"`
-	CreatedBy       User `gorm:"foreignKey:ID"`
-	Teams           []Team
+	CreatedBy       User   `gorm:"foreignKey:ID"`
+	Teams           []Team `gorm:"many2many:hackathon_teams;"`
 	StartDate       string
 	EndDate         string
 }

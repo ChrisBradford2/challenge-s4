@@ -26,3 +26,5 @@ services:
       DB_USER: postgres
       DB_PASSWORD: challengeS4
       DB_NAME: challenge
+    volumes:
+      - ./:/app
