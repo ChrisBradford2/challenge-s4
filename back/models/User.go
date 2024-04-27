@@ -3,13 +3,39 @@ package models
 import "gorm.io/gorm"
 
 type User struct {
-	gorm.Model
-	Username  string `gorm:"unique"`
-	LastName  string
-	FirstName string
-	Email     string `gorm:"unique"`
-	Password  string `gorm:"not null"`
-	TeamID    uint   // Foreign key referencing Team.ID
-	Team      Team   // Belongs to Team
-	Roles     uint8  // 0 = user, 2 = organizer, 4 = admin
+	Base
+	Username  string `gorm:"unique" json:"username" binding:"required" example:"jdoe"`
+	LastName  string `json:"last_name" binding:"required" example:"Doe"`
+	FirstName string `json:"first_name" binding:"required" example:"John"`
+	Email     string `gorm:"unique" json:"email" binding:"required" example:"john.doe@exmple.com"`
+	Password  string `gorm:"not null" json:"password" binding:"required" example:"password"`
+	TeamID    *uint  `json:"team_id" gorm:"column:team_id"`           // Foreign key referencing Team.ID
+	Team      *Team  `json:"team,omitempty" gorm:"foreignKey:TeamID"` // Belongs to Team
+	Roles     uint8  `json:"roles" example:"0"`                       // 0 = user, 2 = organizer, 4 = admin
+}
+
+type UserRegister struct {
+	Username  string `json:"username" binding:"required" example:"jdoe"`
+	LastName  string `json:"last_name" binding:"required" example:"Doe"`
+	FirstName string `json:"first_name" binding:"required" example:"John"`
+	Email     string `json:"email" binding:"required" example:"john.doe@exmple.com"`
+	Password  string `json:"password" binding:"required" example:"password"`
+}
+
+type UserRegisterResponse struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+type UserLogin struct {
+	Email    string `json:"email" binding:"required" example:"john.doe@exmple.com"`
+	Password string `json:"password" binding:"required" example:"password"`
+}
+
+func GetUserByEmail(db *gorm.DB, email string) (*User, error) {
+	var user User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
