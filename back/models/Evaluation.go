@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type Evaluation struct {
-	gorm.Model
+	Base
 	TeamID  uint // Foreign key referencing Team.ID
 	Team    Team // Belongs to Team
 	Note    uint8

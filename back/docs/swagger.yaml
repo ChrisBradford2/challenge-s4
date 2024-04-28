@@ -1,10 +1,20 @@
-basePath: /
 definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
   models.Hackathon:
     properties:
       createdAt:
         type: string
+      createdBy:
+        $ref: '#/definitions/models.User'
+      deletedAt:
+        type: string
       description:
+        type: string
+      endDate:
         type: string
       id:
         type: integer
@@ -13,6 +23,8 @@ definitions:
       maxParticipants:
         type: integer
       name:
+        type: string
+      startDate:
         type: string
       updatedAt:
         type: string
@@ -32,12 +44,176 @@ definitions:
         example: Hackathon de Paris
         type: string
     type: object
+  models.Registration:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      team:
+        allOf:
+        - $ref: '#/definitions/models.Team'
+        description: Belongs to Team
+      teamID:
+        description: Foreign key referencing Team.ID
+        type: integer
+      updatedAt:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Belongs to User
+      userID:
+        description: Foreign key referencing User.ID
+        type: integer
+    type: object
+  models.Team:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      name:
+        example: Team 1
+        type: string
+      registrations:
+        description: Has many Registrations
+        items:
+          $ref: '#/definitions/models.Registration'
+        type: array
+      updatedAt:
+        type: string
+      users:
+        description: Has many Users
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    required:
+    - name
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      email:
+        example: john.doe@exmple.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      id:
+        type: integer
+      last_name:
+        example: Doe
+        type: string
+      password:
+        example: password
+        type: string
+      roles:
+        description: 0 = user, 2 = organizer, 4 = admin
+        example: 0
+        type: integer
+      team:
+        allOf:
+        - $ref: '#/definitions/models.Team'
+        description: Belongs to Team
+      team_id:
+        description: Foreign key referencing Team.ID
+        type: integer
+      updatedAt:
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - username
+    type: object
+  models.UserLogin:
+    properties:
+      email:
+        example: john.doe@exmple.com
+        type: string
+      password:
+        example: password
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.UserRegister:
+    properties:
+      email:
+        example: john.doe@exmple.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      last_name:
+        example: Doe
+        type: string
+      password:
+        example: password
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - username
+    type: object
+  models.UserRegisterResponse:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+    type: object
 info:
-  contact: {}
-  description: Swagger API for the Kiwi Collective project.
-  title: Kiwi Collective API
-  version: "1.0"
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
 paths:
+  /files/me:
+    get:
+      description: Get all files uploaded by the user from Google Cloud Storage
+      responses:
+        "200":
+          description: List of files
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get all files uploaded by the user
+      tags:
+      - files
   /hackathons:
     get:
       description: Récupère une liste de tous les hackathons
@@ -50,6 +226,8 @@ paths:
             items:
               $ref: '#/definitions/models.Hackathon'
             type: array
+      security:
+      - ApiKeyAuth: []
       summary: Lire tous les hackathons
       tags:
       - hackathons
@@ -71,6 +249,8 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/models.Hackathon'
+      security:
+      - ApiKeyAuth: []
       summary: Créer un hackathon
       tags:
       - hackathons
@@ -90,6 +270,8 @@ paths:
           description: true si la suppression est réussie
           schema:
             type: boolean
+      security:
+      - ApiKeyAuth: []
       summary: Supprimer un hackathon
       tags:
       - hackathons
@@ -108,6 +290,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Hackathon'
+      security:
+      - ApiKeyAuth: []
       summary: Lire un hackathon spécifique
       tags:
       - hackathons
@@ -134,7 +318,108 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Hackathon'
+      security:
+      - ApiKeyAuth: []
       summary: Mettre à jour un hackathon
       tags:
       - hackathons
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file to Google Cloud Storage
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: File uploaded successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Upload a file
+      tags:
+      - files
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Login
+      tags:
+      - auth
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRegister'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered
+          schema:
+            $ref: '#/definitions/models.UserRegisterResponse'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Register
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    description: Bearer token
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

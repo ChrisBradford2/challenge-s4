@@ -28,6 +28,5 @@ WORKDIR /app
 COPY --from=builder /app .
 COPY --from=builder /go/bin/air /usr/local/bin/air
 COPY .env ./
-
-# Set the entrypoint to run Air
+COPY hackaton-gcs.json ./
 ENTRYPOINT ["air"]
