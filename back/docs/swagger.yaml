@@ -26,6 +26,10 @@ definitions:
         type: string
       startDate:
         type: string
+      teams:
+        items:
+          $ref: '#/definitions/models.Team'
+        type: array
       updatedAt:
         type: string
     type: object
@@ -378,6 +382,34 @@ paths:
       tags:
       - auth
   /user/me:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully deleted user
+          schema:
+            type: string
+        "401":
+          description: Unauthorized if the token is invalid
+          schema:
+            type: string
+        "404":
+          description: Not Found if the user does not exist
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error for any server errors
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete the current user
+      tags:
+      - users
     get:
       consumes:
       - application/json

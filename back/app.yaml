@@ -1,7 +1,6 @@
-runtime: go122  # Utilisez go122 pour Go 1.22
+runtime: go122  # Use the Go 1.22 runtime
 env: standard
 
 handlers:
 - url: /.*
   script: auto
-

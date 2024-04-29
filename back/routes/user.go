@@ -23,5 +23,9 @@ func UserRoutes(r *gin.Engine, db *gorm.DB, storageService *services.StorageServ
 			middleware.AuthMiddleware(config.RoleUser),
 			userController.UpdateMe,
 		)
+		userGroup.DELETE("/me",
+			middleware.AuthMiddleware(config.RoleUser),
+			userController.DeleteMe,
+		)
 	}
 }

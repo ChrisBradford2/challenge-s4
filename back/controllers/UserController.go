@@ -13,23 +13,6 @@ import (
 	"time"
 )
 
-func (ctrl *UserController) GetUser(c *gin.Context) {
-	id := c.Param("id")
-	var user models.User
-	result := ctrl.db.First(&user, id)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-	c.JSON(http.StatusOK, user)
-}
-
-func (ctrl *UserController) GetUsers(c *gin.Context) {
-	var users []models.User
-	ctrl.db.Find(&users)
-	c.JSON(http.StatusOK, users)
-}
-
 // GetMe godoc
 // @Summary Get the current user
 // @Description Get the current user
@@ -195,26 +178,45 @@ func (ctrl *UserController) UpdateMe(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": "User updated successfully"})
 }
 
-func (ctrl *UserController) UpdateUser(c *gin.Context) {
-	id := c.Param("id")
-	var user models.User
-	if err := ctrl.db.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found", "details": err.Error()})
+// DeleteMe godoc
+// @Summary Delete the current user
+// @Description Delete the currently authenticated user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 204 {string} string "Successfully deleted user"
+// @Failure 401 {string} string "Unauthorized if the token is invalid"
+// @Failure 404 {string} string "Not Found if the user does not exist"
+// @Failure 500 {string} string "Internal Server Error for any server errors"
+// @Router /user/me [delete]
+func (ctrl *UserController) DeleteMe(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
 		return
 	}
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	ctrl.db.Save(&user)
-	c.JSON(http.StatusOK, user)
-}
 
-func (ctrl *UserController) DeleteUser(c *gin.Context) {
-	id := c.Param("id")
-	if err := ctrl.db.Delete(&models.User{}, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found", "details": err.Error()})
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"success": "User deleted"})
+
+	var user models.User
+	if err := ctrl.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if err := ctrl.db.Delete(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not delete user", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }
