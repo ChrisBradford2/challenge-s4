@@ -34,6 +34,15 @@ type UserLogin struct {
 	Password string `json:"password" binding:"required" example:"password"`
 }
 
+// PublicUser omits sensitive data from user model
+type PublicUser struct {
+	ID             uint   `json:"id"`
+	FirstName      string `json:"first_name"`
+	LastName       string `json:"last_name"`
+	Email          string `json:"email"`
+	ProfilePicture string `json:"profile_picture"`
+}
+
 func GetUserByEmail(db *gorm.DB, email string) (*User, error) {
 	var user User
 	if err := db.Where("email = ?", email).First(&user).Error; err != nil {

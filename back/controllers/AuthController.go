@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"challenges4/config"
 	"challenges4/models"
 	"challenges4/services"
 	"context"
@@ -131,7 +132,7 @@ func (ctrl *UserController) Register(c *gin.Context) {
 		"uploadTime": time.Now().Format(time.RFC3339),
 	}
 	if _, err = io.Copy(wc, file); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not upload profile picture"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not upload profile picture", "details": err.Error()})
 		return
 	}
 	if err := wc.Close(); err != nil {
@@ -140,14 +141,14 @@ func (ctrl *UserController) Register(c *gin.Context) {
 	}
 	url, err := services.GenerateSignedURL(bucketName, objectName, ctrl.storageService.Client)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate file URL"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate file URL", "details": err.Error()})
 		return
 	}
 
 	// Hash password
 	hashedPassword, err := services.HashPassword(password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash password", "details": err.Error()})
 		return
 	}
 
@@ -159,11 +160,12 @@ func (ctrl *UserController) Register(c *gin.Context) {
 		ProfilePicture: url,
 		Email:          email,
 		Password:       hashedPassword,
+		Roles:          config.RoleUser,
 	}
 
 	// Insert user into database
 	if err := ctrl.db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user", "details": err.Error()})
 		return
 	}
 

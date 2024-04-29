@@ -22,7 +22,7 @@ func AuthMiddleware(requiredRole uint8) gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(*services.Claims); ok && token.Valid {
-			if claims.Roles < requiredRole {
+			if claims.Roles&requiredRole != requiredRole {
 				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
 				return
 			}

@@ -44,6 +44,19 @@ definitions:
         example: Hackathon de Paris
         type: string
     type: object
+  models.PublicUser:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      profile_picture:
+        type: string
+    type: object
   models.Registration:
     properties:
       createdAt:
@@ -364,6 +377,87 @@ paths:
       summary: Login
       tags:
       - auth
+  /user/me:
+    get:
+      consumes:
+      - application/json
+      description: Get the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved user
+          schema:
+            $ref: '#/definitions/models.PublicUser'
+        "401":
+          description: 'Unauthorized: Invalid token'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get the current user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the profile information of the currently authenticated user,
+        including password.
+      parameters:
+      - description: First name of the user
+        in: formData
+        name: first_name
+        type: string
+      - description: Last name of the user
+        in: formData
+        name: last_name
+        type: string
+      - description: Email address of the user
+        in: formData
+        name: email
+        type: string
+      - description: Profile picture file
+        in: formData
+        name: profile_picture
+        type: file
+      - description: Current password for verification
+        in: formData
+        name: old_password
+        required: true
+        type: string
+      - description: New password for the user
+        in: formData
+        name: new_password
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated user profile
+          schema:
+            $ref: '#/definitions/models.PublicUser'
+        "400":
+          description: Bad request if the provided data is incorrect
+          schema:
+            type: string
+        "401":
+          description: Unauthorized if the user's old password is incorrect or token
+            is invalid
+          schema:
+            type: string
+        "404":
+          description: Not Found if the user does not exist
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error for any server errors
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update current user's profile
+      tags:
+      - users
   /user/register:
     post:
       consumes:
