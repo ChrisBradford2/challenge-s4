@@ -1,17 +1,5 @@
 package models
 
-import (
-	"gorm.io/gorm"
-	"time"
-)
-
-type Base struct {
-	gorm.Model
-	ID        uint      `json:"id" gorm:"primarykey"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
 type Hackathon struct {
 	Base
 	Name            string `json:"name" gorm:"not null"`
