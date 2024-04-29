@@ -117,6 +117,8 @@ definitions:
       password:
         example: password
         type: string
+      profile_picture:
+        type: string
       roles:
         description: 0 = user, 2 = organizer, 4 = admin
         example: 0
@@ -151,30 +153,6 @@ definitions:
     required:
     - email
     - password
-    type: object
-  models.UserRegister:
-    properties:
-      email:
-        example: john.doe@exmple.com
-        type: string
-      first_name:
-        example: John
-        type: string
-      last_name:
-        example: Doe
-        type: string
-      password:
-        example: password
-        type: string
-      username:
-        example: jdoe
-        type: string
-    required:
-    - email
-    - first_name
-    - last_name
-    - password
-    - username
     type: object
   models.UserRegisterResponse:
     properties:
@@ -389,15 +367,39 @@ paths:
   /user/register:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Registers a new user
       parameters:
-      - description: User object
-        in: body
-        name: user
+      - description: Username
+        in: formData
+        name: username
         required: true
-        schema:
-          $ref: '#/definitions/models.UserRegister'
+        type: string
+      - description: Last Name
+        in: formData
+        name: last_name
+        required: true
+        type: string
+      - description: First Name
+        in: formData
+        name: first_name
+        required: true
+        type: string
+      - description: Profile Picture
+        in: formData
+        name: profile_picture
+        required: true
+        type: file
+      - description: Email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
       responses:

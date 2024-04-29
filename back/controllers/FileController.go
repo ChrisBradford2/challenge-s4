@@ -42,19 +42,19 @@ func UploadFile(c *gin.Context, storageService *services.StorageService) {
 
 	userID, err := services.GetUserIDFromToken(token)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized", "details": err.Error()})
 		return
 	}
 
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving the file", "details": err.Error()})
 		return
 	}
 	defer func(file multipart.File) {
 		err := file.Close()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to close the file", "details": err.Error()})
 		}
 	}(file)
 
@@ -64,22 +64,25 @@ func UploadFile(c *gin.Context, storageService *services.StorageService) {
 	objectName := userFolder + "/" + header.Filename
 
 	wc := storageService.Client.Bucket(bucketName).Object(objectName).NewWriter(ctx)
-
 	wc.Metadata = map[string]string{
 		"userID":     strconv.Itoa(int(userID)),
 		"uploadTime": time.Now().Format(time.RFC3339),
 	}
 
 	if _, err = io.Copy(wc, file); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file", "details": err.Error()})
 		return
 	}
 	if err := wc.Close(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to finalize file upload", "details": err.Error()})
 		return
 	}
 
 	url, err := services.GenerateSignedURL(bucketName, objectName, storageService.Client)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate signed URL", "details": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"url": url})
 }

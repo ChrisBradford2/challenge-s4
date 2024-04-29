@@ -5,6 +5,8 @@ import (
 	"challenges4/docs"
 	"challenges4/models"
 	"challenges4/routes"
+	"challenges4/services"
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/madkins23/gin-utils/pkg/ginzero"
@@ -59,11 +61,14 @@ func main() {
 
 	log.Println("Database migrated !")
 
+	ctx := context.Background()
+	storageService := services.NewStorageService(ctx, os.Getenv("GCP_CREDS"))
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "hello, gin-zerolog example")
 	})
 
-	routes.UserRoutes(r, db)
+	routes.UserRoutes(r, db, storageService)
 
 	routes.HackathonRoutes(r, db)
 	if err := db.AutoMigrate(&models.Hackathon{}); err != nil {
