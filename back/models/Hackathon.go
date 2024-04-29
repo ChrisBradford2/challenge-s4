@@ -7,6 +7,7 @@ type Hackathon struct {
 	Location        string `json:"location"`
 	MaxParticipants int    `json:"maxParticipants"`
 	CreatedBy       User   `gorm:"foreignKey:ID"`
+	Teams           []Team `gorm:"many2many:hackathon_teams;"`
 	StartDate       string
 	EndDate         string
 }
