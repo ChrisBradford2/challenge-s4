@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:front/screens/home_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -20,8 +21,13 @@ import 'firebase_options.dart';
 
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // Splash persistance jusqu'a l'ignitialisation
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  // gestion des taches
+  await Future.delayed(const Duration(seconds: 2));
+  // Fin de l'écran splash
+  FlutterNativeSplash.remove();
   // Initialisation de Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
