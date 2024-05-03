@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"challenges4/config"
 	middleware "challenges4/middlewares"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -88,10 +89,10 @@ func HackathonRoutes(r *gin.Engine, db *gorm.DB) {
 	hackathonGroup.Use(middleware.AuthMiddleware(0))
 
 	{
-		hackathonGroup.POST("/", middleware.AuthMiddleware(2), CreateHackathonHandler(db))
-		hackathonGroup.GET("/", GetHackathonsHandler(db))
-		hackathonGroup.GET("/:id", GetHackathonHandler(db))
-		hackathonGroup.PUT("/:id", middleware.AuthMiddleware(2), UpdateHackathonHandler(db))
-		hackathonGroup.DELETE("/:id", middleware.AuthMiddleware(2), DeleteHackathonHandler(db))
+		hackathonGroup.POST("/", middleware.AuthMiddleware(config.RoleOrganizer), CreateHackathonHandler(db))
+		hackathonGroup.GET("/", middleware.AuthMiddleware(config.RoleUser), GetHackathonsHandler(db))
+		hackathonGroup.GET("/:id", middleware.AuthMiddleware(config.RoleUser), GetHackathonHandler(db))
+		hackathonGroup.PUT("/:id", middleware.AuthMiddleware(config.RoleOrganizer), UpdateHackathonHandler(db))
+		hackathonGroup.DELETE("/:id", middleware.AuthMiddleware(config.RoleOrganizer), DeleteHackathonHandler(db))
 	}
 }
