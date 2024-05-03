@@ -29,6 +29,16 @@ jobs:
         go mod verify
       working-directory: ./back
 
+    - name: Lint
+      uses: golangci/golangci-lint-action@v5
+      with:
+        version: v1.57
+        working-directory: ./back
+
+    - name: Test
+      run: go test -v -cover ./...
+      working-directory: ./back
+
     - name: Build
       run: go build -v ./...
       working-directory: ./back
