@@ -26,4 +26,8 @@ test:
 	$(exec_container) go test -v ./...
 
 ssh:
-	$(exec_container) sh
+	$(exec_container) /bin/sh
+
+test-coverage:
+	$(exec_container) go test -v -coverprofile=tmp/coverage.out ./...
+	$(exec_container) go tool cover -html=tmp/coverage.out -o tmp/coverage.html
