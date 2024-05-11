@@ -48,7 +48,7 @@ jobs:
         working-directory: ./front
 
       - name: Build web
-        run: flutter build web
+        run: flutter build web --no-tree-shake-icons
         working-directory: ./front
 
       - name: Upload build artifact

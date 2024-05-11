@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "478440763767",
+    "firebase_url": "https://kiwicollective-50cc9-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "kiwicollective-50cc9",
+    "storage_bucket": "kiwicollective-50cc9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478440763767:android:9a7e85f3f003dcaf0cb172",
+        "android_client_info": {
+          "package_name": "com.example.front"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBijFZoweRA-UF5ReKbuQVyOHa2QaiCUmM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
