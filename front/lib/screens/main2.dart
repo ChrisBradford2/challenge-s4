@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(ProviderScope(child: MyApp()));
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class ThemeNotifier extends ChangeNotifier {
@@ -19,8 +19,8 @@ class ThemeNotifier extends ChangeNotifier {
     // Get the stored theme from shared preferences
     prefs = await SharedPreferences.getInstance();
 
-    int _theme = prefs?.getInt("theme") ?? themeMode.index;
-    themeMode = ThemeMode.values[_theme];
+    int theme = prefs?.getInt("theme") ?? themeMode.index;
+    themeMode = ThemeMode.values[theme];
     notifyListeners();
   }
 
@@ -36,30 +36,32 @@ final themeNotifierProvider =
 ChangeNotifierProvider<ThemeNotifier>((_) => ThemeNotifier());
 
 class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _themeNotifier = ref.watch(themeNotifierProvider);
+    final themeNotifier = ref.watch(themeNotifierProvider);
 
     return MaterialApp(
       title: 'Flutter Demo',
-      themeMode: _themeNotifier.themeMode,
+      themeMode: themeNotifier.themeMode,
       // Define your themes here
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
 
 class HomePage extends ConsumerWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.watch(themeNotifierProvider);
 
     return Scaffold(
-        appBar: AppBar(title: Text("Dynamic Theme")),
+        appBar: AppBar(title: const Text("Dynamic Theme")),
         body: Column(
           children: [
             _singleTile("Dark Theme", ThemeMode.dark, notifier),

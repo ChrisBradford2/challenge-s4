@@ -5,20 +5,20 @@ import 'package:front/services/sample/sample_bloc.dart';
 import '../utils/translate.dart';
 
 class HomeScreen extends StatelessWidget{
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
   @override
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home"),
+        title: const Text("Home"),
       ),
       body: BlocBuilder<SampleBloc, SampleState>(
-        bloc: context.read<SampleBloc>()..add(OnSampleBloc()),
+        bloc: context.read<SampleBloc>()..add(const OnSampleBloc()),
         builder: (context, state) {
           return Center(
             child: Text(
               t(context)!.helloWorld,
-              style: Theme.of(context).textTheme.headline1,
+              style: Theme.of(context).textTheme.displayLarge,
             ),
           );
       },)

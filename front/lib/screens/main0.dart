@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -11,17 +14,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
   late AnimationController animationController;
   late Animation<double> degOneTranslationAnimation, degTwoTranslationAnimation, degThreeTranslationAnimation, rotationAnimation;
 
@@ -39,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 250));
+    animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
     degOneTranslationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(animationController);
     degTwoTranslationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(animationController);
     degThreeTranslationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(animationController);
@@ -57,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      body: Container(
+      body: SizedBox(
         width: size.width,
         height: size.height,
         child: Stack(
@@ -76,70 +81,76 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     ),
                   ),
                   Transform.translate(
-                    offset: Offset.fromDirection(getRadiansFromDegree(270), (degOneTranslationAnimation.value ?? 0.0) * 100),
+                    offset: Offset.fromDirection(getRadiansFromDegree(270), (degOneTranslationAnimation.value) * 100),
                     child: Transform(
-                      transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value ?? 0.0))..scale(degOneTranslationAnimation.value ?? 0.0),
+                      transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value))..scale(degOneTranslationAnimation.value),
                       alignment: Alignment.center,
                       child: CircularButton(
                         color: Colors.blue,
                         width: 50,
                         height: 50,
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.add,
                           color: Colors.white,
                         ),
                         onClick: () {
-                          print('First Button');
+                          if (kDebugMode) {
+                            print('First Button');
+                          }
                         },
                       ),
                     ),
                   ),
                   Transform.translate(
-                    offset: Offset.fromDirection(getRadiansFromDegree(225), (degTwoTranslationAnimation.value ?? 0.0) * 100),
+                    offset: Offset.fromDirection(getRadiansFromDegree(225), (degTwoTranslationAnimation.value) * 100),
                     child: Transform(
-                      transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value ?? 0.0))..scale(degTwoTranslationAnimation.value ?? 0.0),
+                      transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value))..scale(degTwoTranslationAnimation.value),
                       alignment: Alignment.center,
                       child: CircularButton(
                         color: Colors.black,
                         width: 50,
                         height: 50,
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.camera_alt,
                           color: Colors.white,
                         ),
                         onClick: () {
-                          print('Second button');
+                          if (kDebugMode) {
+                            print('Second button');
+                          }
                         },
                       ),
                     ),
                   ),
                   Transform.translate(
-                    offset: Offset.fromDirection(getRadiansFromDegree(180), (degThreeTranslationAnimation.value ?? 0.0) * 100),
+                    offset: Offset.fromDirection(getRadiansFromDegree(180), (degThreeTranslationAnimation.value) * 100),
                     child: Transform(
-                      transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value ?? 0.0))..scale(degThreeTranslationAnimation.value ?? 0.0),
+                      transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value))..scale(degThreeTranslationAnimation.value),
                       alignment: Alignment.center,
                       child: CircularButton(
                         color: Colors.orangeAccent,
                         width: 50,
                         height: 50,
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.person,
                           color: Colors.white,
                         ),
                         onClick: () {
-                          print('Third Button');
+                          if (kDebugMode) {
+                            print('Third Button');
+                          }
                         },
                       ),
                     ),
                   ),
                   Transform(
-                    transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value ?? 0.0)),
+                    transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value)),
                     alignment: Alignment.center,
                     child: CircularButton(
                       color: Colors.red,
                       width: 60,
                       height: 60,
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.menu,
                         color: Colors.white,
                       ),
@@ -169,7 +180,7 @@ class CircularButton extends StatelessWidget {
   final Icon icon;
   final Function onClick;
 
-  CircularButton({
+  const CircularButton({super.key,
     required this.color,
     required this.width,
     required this.height,

@@ -4,7 +4,7 @@ import 'package:front/services/sample/sample_bloc.dart';
 
 class ServiceFactory extends StatelessWidget {
   final Widget child;
-  const ServiceFactory({Key? key, required this.child}): super(key: key);
+  const ServiceFactory({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
