@@ -6,10 +6,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:front/screens/home_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:front/screens/login/login_screen.dart';
+import 'package:front/services/authentication_service.dart';
+import 'package:front/services/login/login_bloc.dart';
 import 'package:front/services/service_factory.dart';
 import 'package:json_theme/json_theme.dart';
 import 'package:flutter/services.dart';
@@ -48,13 +52,22 @@ Future<void> main() async {
   await FirebaseFirestore.instance.terminate();
   await FirebaseFirestore.instance.clearPersistence();
 
-  runApp(App(
-    theme: theme,
-    firebaseAuth: FirebaseAuth.instance,
-    firebaseFirestore: FirebaseFirestore.instance,
-    firebaseStorage: FirebaseStorage.instance,
-    firebaseFunctions: FirebaseFunctions.instance,
-  ));
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => LoginBloc(AuthenticationService()),
+        ),
+      ],
+      child: App(
+        theme: theme,
+        firebaseAuth: FirebaseAuth.instance,
+        firebaseFirestore: FirebaseFirestore.instance,
+        firebaseStorage: FirebaseStorage.instance,
+        firebaseFunctions: FirebaseFunctions.instance,
+      ),
+    ),
+  );
 }
 
 class App extends StatelessWidget {
@@ -92,7 +105,19 @@ class App extends StatelessWidget {
             Locale('fr', ''),
           ],
           theme: theme,
-          home: const HomeScreen(),
+          home: StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.active) {
+                if (snapshot.hasData) {
+                  return HomeScreen(token: snapshot.data!.uid);
+                } else {
+                  return const LoginPage();
+                }
+              }
+              return const CircularProgressIndicator();
+            },
+          ),
         ),
     );
   }
