@@ -14,7 +14,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:front/screens/login/login_screen.dart';
 import 'package:front/services/authentication_service.dart';
 import 'package:front/services/login/login_bloc.dart';
+import 'package:front/services/register/register_bloc.dart';
 import 'package:front/services/service_factory.dart';
+import 'package:front/utils/routes.dart';
 import 'package:json_theme/json_theme.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
@@ -58,6 +60,9 @@ Future<void> main() async {
         BlocProvider(
           create: (context) => LoginBloc(AuthenticationService()),
         ),
+        BlocProvider(
+            create: (context) => RegistrationBloc(AuthenticationService())
+        ),
       ],
       child: App(
         theme: theme,
@@ -100,6 +105,17 @@ class App extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          initialRoute: '/',
+          routes: getApplicationRoutes(),
+          onUnknownRoute: (settings) {
+            return MaterialPageRoute(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: Text('No route defined for ${settings.name}'),
+                ),
+              ),
+            );
+          },
           supportedLocales: const [
             Locale('en', ''),
             Locale('fr', ''),

@@ -4,6 +4,7 @@ import '../services/user_service.dart';
 
 class HomeScreen extends StatelessWidget {
   final String token;
+
   HomeScreen({super.key, required this.token});
 
   // @todo Delete this when the backend is ready

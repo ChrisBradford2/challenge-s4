@@ -54,6 +54,12 @@ class LoginPage extends StatelessWidget {
                 },
                 child: const Text('Login'),
               ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/register');
+                },
+                child: const Text('Register'),
+              ),
             ],
           ),
         ),
