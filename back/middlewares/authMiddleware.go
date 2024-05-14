@@ -14,9 +14,7 @@ func AuthMiddleware(requiredRole uint8) gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		prefix := "Bearer "
 
-		if strings.HasPrefix(authHeader, prefix) {
-			authHeader = strings.TrimPrefix(authHeader, prefix)
-		}
+		authHeader = strings.TrimPrefix(authHeader, prefix)
 
 		token, err := jwt.ParseWithClaims(authHeader, &services.Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return config.JWTSecret, nil
