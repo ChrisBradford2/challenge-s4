@@ -5,6 +5,7 @@ import (
 	"challenges4/docs"
 	"challenges4/models"
 	"challenges4/routes"
+	"challenges4/seeders"
 	"challenges4/services"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -69,11 +70,25 @@ func main() {
 	})
 
 	routes.UserRoutes(r, db, storageService)
+	routes.SetupTeamRoutes(r, db)
+	routes.SetupRegistrationRoutes(r, db)
 
 	routes.HackathonRoutes(r, db)
 	if err := db.AutoMigrate(&models.Hackathon{}); err != nil {
 		log.Fatal("Failed to migrate the database: ", err)
 	}
+
+	seederError := seeders.SeedUsers(db)
+	if seederError != nil {
+		log.Fatal("Failed to seed :", err)
+	}
+
+	//hashedPassword, err := services.HashPassword("test12")
+	//if err != nil {
+	//	fmt.Println("Error hashing password:", err)
+	//	return
+	//}
+	//fmt.Println("Hashed password:", hashedPassword)
 
 	// File upload
 	routes.FileRoutes(r, os.Getenv("GCP_CREDS"))
