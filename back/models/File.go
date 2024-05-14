@@ -6,6 +6,7 @@ import (
 
 type File struct {
 	Base
+	HackathonID  uint      `json:"hackathon_id"`                 // Foreign key for Hackathon
 	UserID       string    `gorm:"index;not null" json:"userId"` // User ID
 	Name         string    `json:"name"`                         // Filename
 	Size         int64     `json:"size"`                         // File size in bytes

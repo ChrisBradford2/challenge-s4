@@ -13,6 +13,8 @@ type User struct {
 	TeamID         *uint  `json:"team_id" gorm:"column:team_id"`           // Foreign key referencing Team.ID
 	Team           *Team  `json:"team,omitempty" gorm:"foreignKey:TeamID"` // Belongs to Team
 	Roles          uint8  `json:"roles" example:"0"`                       // 0 = user, 2 = organizer, 4 = admin
+	CreatedByID    *uint  `json:"created_by_id"`
+	CreatedBy      *User  `gorm:"foreignKey:CreatedByID"`
 }
 
 type UserRegister struct {
