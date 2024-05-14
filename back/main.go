@@ -33,69 +33,70 @@ import (
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
-	docs.SwaggerInfo.Title = "Kiwi Collective API"
-	docs.SwaggerInfo.Description = "API for the Kiwi Collective project."
-	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8080"
-	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Schemes = []string{"http"}
-	r := gin.New()
-	r.Use(ginzero.Logger())
-
-	//DB connection
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// Load environment variables
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file: ", err)
 	}
 
+	// Database connection
 	db, err := database.ConnectDatabase()
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
-	log.Println("Connected to the database !")
+	log.Println("Connected to the database!")
 
-	// Migrate the schema
-	err = db.AutoMigrate(&models.User{})
-	if err != nil {
-		log.Fatal("Failed to migrate the database: ", err)
+	// Migrate the schema in a controlled order
+	if err := db.AutoMigrate(&models.Hackathon{}); err != nil {
+		log.Fatal("Failed to migrate hackathons: ", err)
 	}
+	if err := db.AutoMigrate(&models.Team{}); err != nil {
+		log.Fatal("Failed to migrate teams: ", err)
+	}
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		log.Fatal("Failed to migrate users: ", err)
+	}
+	if err := db.AutoMigrate(&models.Registration{}); err != nil {
+		log.Fatal("Failed to migrate registrations: ", err)
+	}
+	if err := db.AutoMigrate(&models.File{}); err != nil {
+		log.Fatal("Failed to migrate files: ", err)
+	}
+	log.Println("Database migrated!")
 
-	log.Println("Database migrated !")
-
+	// Context for services
 	ctx := context.Background()
 	storageService := services.NewStorageService(ctx, os.Getenv("GCP_CREDS"))
 
+	// Set up Gin router
+	r := gin.New()
+	r.Use(ginzero.Logger())
+
+	// Default route
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "hello, gin-zerolog example")
 	})
 
+	// Swagger documentation
+	docs.SwaggerInfo.Title = "Kiwi Collective API"
+	docs.SwaggerInfo.Description = "API for the Kiwi Collective project."
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Host = "localhost"
+	docs.SwaggerInfo.Schemes = []string{"https", "http"}
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Setup routes
 	routes.UserRoutes(r, db, storageService)
 	routes.SetupTeamRoutes(r, db)
 	routes.SetupRegistrationRoutes(r, db)
-
 	routes.HackathonRoutes(r, db)
-	if err := db.AutoMigrate(&models.Hackathon{}); err != nil {
-		log.Fatal("Failed to migrate the database: ", err)
-	}
-
-	seederError := seeders.SeedUsers(db)
-	if seederError != nil {
-		log.Fatal("Failed to seed :", err)
-	}
-
-	//hashedPassword, err := services.HashPassword("test12")
-	//if err != nil {
-	//	fmt.Println("Error hashing password:", err)
-	//	return
-	//}
-	//fmt.Println("Hashed password:", hashedPassword)
-
-	// File upload
 	routes.FileRoutes(r, os.Getenv("GCP_CREDS"))
 
-	// Swagger
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if err := seeders.SeedUsers(db); err != nil {
+		log.Fatal("Failed to seed users: ", err)
+	}
 
+	// Start server
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server: ", err)
 	}
