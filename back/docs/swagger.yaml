@@ -318,6 +318,276 @@ paths:
       summary: Mettre à jour un hackathon
       tags:
       - hackathons
+  /registrations:
+    get:
+      description: Retrieves registrations from the database with optional filtering
+        based on teamid, user, and status
+      parameters:
+      - description: Filter by team ID
+        in: query
+        name: teamid
+        type: integer
+      - description: Filter by user
+        in: query
+        name: user
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Registration'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get registrations with optional filters
+      tags:
+      - registrations
+    post:
+      consumes:
+      - application/json
+      description: Create a new registration
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved registration
+          schema:
+            $ref: '#/definitions/models.Registration'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new registration
+      tags:
+      - registrations
+  /registrations/{id}:
+    delete:
+      description: Deletes a registration from the database
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a registration
+      tags:
+      - registrations
+    get:
+      description: Retrieves a specific registration from the database
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Registration'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a registration
+      tags:
+      - registrations
+    patch:
+      consumes:
+      - application/json
+      description: Update a registration by ID
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Registration object
+        in: body
+        name: registration
+        required: true
+        schema:
+          $ref: '#/definitions/models.Registration'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated registration
+          schema:
+            $ref: '#/definitions/models.Registration'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Registration not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update a registration
+      tags:
+      - registrations
+  /teams:
+    get:
+      description: Get all teams
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved teams
+          schema:
+            items:
+              $ref: '#/definitions/models.Team'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get all teams
+      tags:
+      - teams
+    post:
+      consumes:
+      - application/json
+      description: Create a new team
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved team
+          schema:
+            $ref: '#/definitions/models.Team'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new team
+      tags:
+      - teams
+  /teams/{id}:
+    delete:
+      description: Delete a team by ID
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully deleted team
+        "404":
+          description: Team not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a team
+      tags:
+      - teams
+    get:
+      description: Get a team by ID
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved team
+          schema:
+            $ref: '#/definitions/models.Team'
+        "404":
+          description: Team not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get a team
+      tags:
+      - teams
+    patch:
+      consumes:
+      - application/json
+      description: Update a team by ID
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Team object
+        in: body
+        name: team
+        required: true
+        schema:
+          $ref: '#/definitions/models.Team'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated team
+          schema:
+            $ref: '#/definitions/models.Team'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Team not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update a team
+      tags:
+      - teams
   /upload:
     post:
       consumes:

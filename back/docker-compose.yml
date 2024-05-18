@@ -8,16 +8,16 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: challengeS4
       POSTGRES_DB: challenge
+
   adminer:
     image: adminer
     ports:
       - "8081:8080"
     depends_on:
       - database
+
   app:
     build: .
-    ports:
-      - "8080:8080"
     depends_on:
       - database
     environment:
@@ -28,3 +28,14 @@ services:
       DB_NAME: challenge
     volumes:
       - ./:/app
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/etc/nginx/certs
+    depends_on:
+      - app
