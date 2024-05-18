@@ -2,6 +2,7 @@ package routes
 
 import (
 	"challenges4/config"
+	"challenges4/controllers"
 	middleware "challenges4/middlewares"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ import (
 // @Router /hackathons [post]
 func CreateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		middleware.CreateHackathon(c, db)
+		controllers.CreateHackathon(c, db)
 	}
 }
 
@@ -33,7 +34,7 @@ func CreateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Router /hackathons [get]
 func GetHackathonsHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		middleware.GetHackathons(c, db)
+		controllers.GetHackathons(c, db)
 	}
 }
 
@@ -48,7 +49,7 @@ func GetHackathonsHandler(db *gorm.DB) gin.HandlerFunc {
 // @Router /hackathons/{id} [get]
 func GetHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		middleware.GetHackathon(c, db)
+		controllers.GetHackathon(c, db)
 	}
 }
 
@@ -65,7 +66,7 @@ func GetHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Router /hackathons/{id} [put]
 func UpdateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		middleware.UpdateHackathon(c, db)
+		controllers.UpdateHackathon(c, db)
 	}
 }
 
@@ -80,7 +81,7 @@ func UpdateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 // @Router /hackathons/{id} [delete]
 func DeleteHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		middleware.DeleteHackathon(c, db)
+		controllers.DeleteHackathon(c, db)
 	}
 }
 
