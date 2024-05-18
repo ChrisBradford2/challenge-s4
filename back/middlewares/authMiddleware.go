@@ -6,13 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
+	"strings"
 )
 
 func AuthMiddleware(requiredRole uint8) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
+		authHeader := c.GetHeader("Authorization")
+		prefix := "Bearer "
 
-		token, err := jwt.ParseWithClaims(tokenString, &services.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		authHeader = strings.TrimPrefix(authHeader, prefix)
+
+		token, err := jwt.ParseWithClaims(authHeader, &services.Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return config.JWTSecret, nil
 		})
 

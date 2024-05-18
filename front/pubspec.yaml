@@ -43,12 +43,18 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter_localizations:
     sdk: flutter
-  intl: ^0.18.1
+  intl: ^0.19.0
   json_theme: ^6.4.0
   equatable: ^2.0.5
   flutter_bloc: ^8.1.5
   flutter_native_splash: ^2.4.0
   bloc: ^8.1.4
+  flutter_dotenv: ^5.1.0
+  http: ^1.2.1
+  jwt_decode: ^0.3.1
+  mime: ^1.0.5
+  image_picker: ^1.1.1
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +65,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -74,6 +80,7 @@ flutter:
   assets:
     - flutter_native_splash.yaml
     - assets/theme.json
+    - .env
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

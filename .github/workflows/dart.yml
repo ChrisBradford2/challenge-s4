@@ -37,7 +37,7 @@ jobs:
 
       # Consider passing '--fatal-infos' for slightly stricter analysis.
       - name: Analyze project source
-        run: flutter analyze
+        run: cp .env.exemple .env && flutter analyze
         working-directory: ./front
 
       # Your project will need to have tests in test/ and a dependency on
