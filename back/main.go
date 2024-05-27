@@ -61,6 +61,9 @@ func main() {
 	if err := db.AutoMigrate(&models.File{}); err != nil {
 		log.Fatal("Failed to migrate files: ", err)
 	}
+	if err := db.AutoMigrate(&models.Notification{}); err != nil {
+		log.Fatal("Failed to migrate notifications: ", err)
+	}
 	log.Println("Database migrated!")
 
 	// Context for services
@@ -91,6 +94,7 @@ func main() {
 	routes.SetupTeamRoutes(r, db)
 	routes.SetupRegistrationRoutes(r, db)
 	routes.HackathonRoutes(r, db)
+	routes.NotificationRoutes(r, db)
 	routes.FileRoutes(r, os.Getenv("GCP_CREDS"))
 
 	if err := seeders.SeedUsers(db); err != nil {
@@ -99,6 +103,10 @@ func main() {
 
 	if err := seeders.SeedHackathons(db); err != nil {
 		log.Fatal("Failed to seed hackathons: ", err)
+	}
+
+	if err := seeders.SeedNotifications(db); err != nil {
+		log.Fatal("Failed to seed notifications: ", err)
 	}
 
 	// Start server
