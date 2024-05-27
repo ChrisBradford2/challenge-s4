@@ -85,6 +85,21 @@ func DeleteHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// RegisterHackathonHandler enregistre un utilisateur à un hackathon
+// @Summary Enregistrer un utilisateur à un hackathon
+// @Description Enregistre un utilisateur à un hackathon par son ID
+// @Tags hackathons
+// @Produce  json
+// @Param id path int true "ID du Hackathon"
+// @Security ApiKeyAuth
+// @Success 200 {object} bool "Inscription réussie"
+// @Router /hackathons/{id}/register [post]
+func RegisterHackathonHandler(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		controllers.HackathonRegister(c, db)
+	}
+}
+
 func HackathonRoutes(r *gin.Engine, db *gorm.DB) {
 	hackathonGroup := r.Group("/hackathons")
 	hackathonGroup.Use(middleware.AuthMiddleware(0))
@@ -95,5 +110,6 @@ func HackathonRoutes(r *gin.Engine, db *gorm.DB) {
 		hackathonGroup.GET("/:id", middleware.AuthMiddleware(config.RoleUser), GetHackathonHandler(db))
 		hackathonGroup.PUT("/:id", middleware.AuthMiddleware(config.RoleOrganizer), UpdateHackathonHandler(db))
 		hackathonGroup.DELETE("/:id", middleware.AuthMiddleware(config.RoleOrganizer), DeleteHackathonHandler(db))
+		hackathonGroup.POST("/:id/register", middleware.AuthMiddleware(config.RoleUser), RegisterHackathonHandler(db))
 	}
 }

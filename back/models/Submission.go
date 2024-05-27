@@ -7,7 +7,7 @@ type Submission struct {
 	EvaluationID uint       `json:"evaluation_id"`
 	Evaluation   Evaluation `json:"evaluation"`
 	Status       string     `json:"status"`
-	AttachedFile string     `json:"attached_file"`
+	GitLink      string     `json:"git_link"`
 	StepID       uint       `json:"step_id"`
 	Step         Step       `json:"step"`
 }
