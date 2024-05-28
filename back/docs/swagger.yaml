@@ -4,27 +4,78 @@ definitions:
       error:
         type: string
     type: object
-  models.Hackathon:
+  models.File:
     properties:
+      contentType:
+        description: File content type
+        type: string
       createdAt:
         type: string
-      createdBy:
+      deletedAt:
+        type: string
+      hackathon_id:
+        description: Foreign key for Hackathon
+        type: integer
+      id:
+        type: integer
+      lastModified:
+        description: Last modified date
+        type: string
+      name:
+        description: Filename
+        type: string
+      size:
+        description: File size in bytes
+        type: integer
+      updatedAt:
+        type: string
+      url:
+        description: URL to download the file from Google Cloud Storage
+        type: string
+      userId:
+        description: User ID
+        type: string
+    type: object
+  models.Hackathon:
+    properties:
+      created_by:
         $ref: '#/definitions/models.User'
+      created_by_id:
+        type: integer
+      createdAt:
+        type: string
       deletedAt:
         type: string
       description:
+        example: Un événement pour les développeurs
         type: string
-      endDate:
+      end_date:
+        example: "2021-01-02"
         type: string
+      hackathon_files:
+        items:
+          $ref: '#/definitions/models.File'
+        type: array
       id:
         type: integer
+      is_active:
+        type: boolean
       location:
+        example: Paris
         type: string
-      maxParticipants:
+      max_participants:
+        example: 100
         type: integer
       name:
+        example: Hackathon de Paris
         type: string
-      startDate:
+      participations:
+        description: Many-to-many relationship with User through Participation
+        items:
+          $ref: '#/definitions/models.Participation'
+        type: array
+      start_date:
+        example: "2021-01-01"
         type: string
       teams:
         items:
@@ -38,15 +89,41 @@ definitions:
       description:
         example: Un événement pour les développeurs
         type: string
+      end_date:
+        example: "2021-01-02"
+        type: string
       location:
         example: Paris
         type: string
-      maxParticipants:
+      max_participants:
         example: 100
         type: integer
       name:
         example: Hackathon de Paris
         type: string
+      start_date:
+        example: "2021-01-01"
+        type: string
+    type: object
+  models.Participation:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      hackathonID:
+        description: Foreign key referencing Hackathon.ID
+        type: integer
+      id:
+        type: integer
+      isOrganizer:
+        description: Indicates if the user is an organizer of the hackathon
+        type: boolean
+      updatedAt:
+        type: string
+      userID:
+        description: Foreign key referencing User.ID
+        type: integer
     type: object
   models.PublicUser:
     properties:
@@ -69,8 +146,9 @@ definitions:
         type: string
       id:
         type: integer
-      status:
-        type: string
+      is_valid:
+        example: false
+        type: boolean
       team:
         allOf:
         - $ref: '#/definitions/models.Team'
@@ -88,12 +166,22 @@ definitions:
         description: Foreign key referencing User.ID
         type: integer
     type: object
+  models.RegistrationUpdate:
+    properties:
+      is_valid:
+        example: true
+        type: boolean
+    type: object
   models.Team:
     properties:
       createdAt:
         type: string
       deletedAt:
         type: string
+      hackathon:
+        $ref: '#/definitions/models.Hackathon'
+      hackathon_id:
+        type: integer
       id:
         type: integer
       name:
@@ -116,8 +204,12 @@ definitions:
     type: object
   models.User:
     properties:
+      created_by_id:
+        type: integer
       createdAt:
         type: string
+      createdBy:
+        $ref: '#/definitions/models.User'
       deletedAt:
         type: string
       email:
@@ -131,6 +223,11 @@ definitions:
       last_name:
         example: Doe
         type: string
+      participations:
+        description: Many-to-many relationship with Hackathon through Participation
+        items:
+          $ref: '#/definitions/models.Participation'
+        type: array
       password:
         example: password
         type: string
@@ -211,7 +308,7 @@ paths:
       - files
   /hackathons:
     get:
-      description: Récupère une liste de tous les hackathons
+      description: Get all Hackathons
       produces:
       - application/json
       responses:
@@ -223,15 +320,15 @@ paths:
             type: array
       security:
       - ApiKeyAuth: []
-      summary: Lire tous les hackathons
+      summary: Get all Hackathons
       tags:
-      - hackathons
+      - Hackathons
     post:
       consumes:
       - application/json
-      description: Ajoute un nouveau hackathon à la base de données
+      description: Create a new Hackathon
       parameters:
-      - description: Hackathon à créer
+      - description: Hackathon object
         in: body
         name: hackathon
         required: true
@@ -240,20 +337,28 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: Successfully created Hackathon
           schema:
             $ref: '#/definitions/models.Hackathon'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
       security:
       - ApiKeyAuth: []
-      summary: Créer un hackathon
+      summary: Create a new Hackathon
       tags:
-      - hackathons
+      - Hackathons
   /hackathons/{id}:
     delete:
-      description: Supprime un hackathon par son ID
+      description: Delete a Hackathon
       parameters:
-      - description: ID du Hackathon
+      - description: Hackathon ID
         in: path
         name: id
         required: true
@@ -262,18 +367,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: true si la suppression est réussie
+          description: Successfully deleted Hackathon
           schema:
             type: boolean
       security:
       - ApiKeyAuth: []
-      summary: Supprimer un hackathon
+      summary: Delete a Hackathon
       tags:
-      - hackathons
-    get:
-      description: Récupère un hackathon par son ID
+      - Hackathons
+  /hackathons/{id}/register:
+    post:
+      description: Register for a Hackathon
       parameters:
-      - description: ID du Hackathon
+      - description: Hackathon ID
         in: path
         name: id
         required: true
@@ -282,42 +388,14 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfully registered for Hackathon
           schema:
-            $ref: '#/definitions/models.Hackathon'
+            type: boolean
       security:
       - ApiKeyAuth: []
-      summary: Lire un hackathon spécifique
+      summary: Register for a Hackathon
       tags:
-      - hackathons
-    put:
-      consumes:
-      - application/json
-      description: Met à jour les informations d'un hackathon par son ID
-      parameters:
-      - description: ID du Hackathon
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Informations du Hackathon à mettre à jour
-        in: body
-        name: hackathon
-        required: true
-        schema:
-          $ref: '#/definitions/models.Hackathon'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Hackathon'
-      security:
-      - ApiKeyAuth: []
-      summary: Mettre à jour un hackathon
-      tags:
-      - hackathons
+      - Hackathons
   /registrations:
     get:
       description: Retrieves registrations from the database with optional filtering
@@ -418,12 +496,12 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Registration object
+      - description: Registration update object
         in: body
         name: registration
         required: true
         schema:
-          $ref: '#/definitions/models.Registration'
+          $ref: '#/definitions/models.RegistrationUpdate'
       produces:
       - application/json
       responses:
@@ -433,6 +511,10 @@ paths:
             $ref: '#/definitions/models.Registration'
         "400":
           description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "404":

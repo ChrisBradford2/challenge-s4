@@ -65,14 +65,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Récupère une liste de tous les hackathons",
+                "description": "Get all Hackathons",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "hackathons"
+                    "Hackathons"
                 ],
-                "summary": "Lire tous les hackathons",
+                "summary": "Get all Hackathons",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -91,7 +91,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Ajoute un nouveau hackathon à la base de données",
+                "description": "Create a new Hackathon",
                 "consumes": [
                     "application/json"
                 ],
@@ -99,12 +99,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "hackathons"
+                    "Hackathons"
                 ],
-                "summary": "Créer un hackathon",
+                "summary": "Create a new Hackathon",
                 "parameters": [
                     {
-                        "description": "Hackathon à créer",
+                        "description": "Hackathon object",
                         "name": "hackathon",
                         "in": "body",
                         "required": true,
@@ -114,110 +114,46 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "Successfully created Hackathon",
                         "schema": {
                             "$ref": "#/definitions/models.Hackathon"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
             }
         },
         "/hackathons/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Récupère un hackathon par son ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "hackathons"
-                ],
-                "summary": "Lire un hackathon spécifique",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID du Hackathon",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Hackathon"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Met à jour les informations d'un hackathon par son ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "hackathons"
-                ],
-                "summary": "Mettre à jour un hackathon",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID du Hackathon",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Informations du Hackathon à mettre à jour",
-                        "name": "hackathon",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Hackathon"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Hackathon"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Supprime un hackathon par son ID",
+                "description": "Delete a Hackathon",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "hackathons"
+                    "Hackathons"
                 ],
-                "summary": "Supprimer un hackathon",
+                "summary": "Delete a Hackathon",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID du Hackathon",
+                        "description": "Hackathon ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -225,7 +161,41 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "true si la suppression est réussie",
+                        "description": "Successfully deleted Hackathon",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "/hackathons/{id}/register": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Register for a Hackathon",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hackathons"
+                ],
+                "summary": "Register for a Hackathon",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Hackathon ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully registered for Hackathon",
                         "schema": {
                             "type": "boolean"
                         }
@@ -400,12 +370,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Registration object",
+                        "description": "Registration update object",
                         "name": "registration",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Registration"
+                            "$ref": "#/definitions/models.RegistrationUpdate"
                         }
                     }
                 ],
@@ -418,6 +388,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
@@ -1012,38 +988,108 @@ const docTemplate = `{
                 }
             }
         },
+        "models.File": {
+            "type": "object",
+            "properties": {
+                "contentType": {
+                    "description": "File content type",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "hackathon_id": {
+                    "description": "Foreign key for Hackathon",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastModified": {
+                    "description": "Last modified date",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Filename",
+                    "type": "string"
+                },
+                "size": {
+                    "description": "File size in bytes",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL to download the file from Google Cloud Storage",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
         "models.Hackathon": {
             "type": "object",
             "properties": {
                 "createdAt": {
                     "type": "string"
                 },
-                "createdBy": {
+                "created_by": {
                     "$ref": "#/definitions/models.User"
+                },
+                "created_by_id": {
+                    "type": "integer"
                 },
                 "deletedAt": {
                     "type": "string"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Un événement pour les développeurs"
                 },
-                "endDate": {
-                    "type": "string"
+                "end_date": {
+                    "type": "string",
+                    "example": "2021-01-02"
+                },
+                "hackathon_files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.File"
+                    }
                 },
                 "id": {
                     "type": "integer"
                 },
-                "location": {
-                    "type": "string"
+                "is_active": {
+                    "type": "boolean"
                 },
-                "maxParticipants": {
-                    "type": "integer"
+                "location": {
+                    "type": "string",
+                    "example": "Paris"
+                },
+                "max_participants": {
+                    "type": "integer",
+                    "example": 100
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Hackathon de Paris"
                 },
-                "startDate": {
-                    "type": "string"
+                "participations": {
+                    "description": "Many-to-many relationship with User through Participation",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Participation"
+                    }
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "2021-01-01"
                 },
                 "teams": {
                     "type": "array",
@@ -1063,17 +1109,54 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Un événement pour les développeurs"
                 },
+                "end_date": {
+                    "type": "string",
+                    "example": "2021-01-02"
+                },
                 "location": {
                     "type": "string",
                     "example": "Paris"
                 },
-                "maxParticipants": {
+                "max_participants": {
                     "type": "integer",
                     "example": 100
                 },
                 "name": {
                     "type": "string",
                     "example": "Hackathon de Paris"
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "2021-01-01"
+                }
+            }
+        },
+        "models.Participation": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "hackathonID": {
+                    "description": "Foreign key referencing Hackathon.ID",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isOrganizer": {
+                    "description": "Indicates if the user is an organizer of the hackathon",
+                    "type": "boolean"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "description": "Foreign key referencing User.ID",
+                    "type": "integer"
                 }
             }
         },
@@ -1109,8 +1192,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "status": {
-                    "type": "string"
+                "is_valid": {
+                    "type": "boolean",
+                    "example": false
                 },
                 "team": {
                     "description": "Belongs to Team",
@@ -1141,6 +1225,15 @@ const docTemplate = `{
                 }
             }
         },
+        "models.RegistrationUpdate": {
+            "type": "object",
+            "properties": {
+                "is_valid": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "models.Team": {
             "type": "object",
             "required": [
@@ -1152,6 +1245,12 @@ const docTemplate = `{
                 },
                 "deletedAt": {
                     "type": "string"
+                },
+                "hackathon": {
+                    "$ref": "#/definitions/models.Hackathon"
+                },
+                "hackathon_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1192,6 +1291,12 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
+                "createdBy": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "created_by_id": {
+                    "type": "integer"
+                },
                 "deletedAt": {
                     "type": "string"
                 },
@@ -1209,6 +1314,13 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string",
                     "example": "Doe"
+                },
+                "participations": {
+                    "description": "Many-to-many relationship with Hackathon through Participation",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Participation"
+                    }
                 },
                 "password": {
                     "type": "string",
