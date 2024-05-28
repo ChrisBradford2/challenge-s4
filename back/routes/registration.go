@@ -11,10 +11,7 @@ import (
 func SetupRegistrationRoutes(router *gin.Engine, db *gorm.DB) {
 	registrationController := controllers.NewRegistrationController(db)
 
-	registrationRoutes := router.Group("/registrations")
-	registrationRoutes.Use(middlewares.AuthMiddleware(config.RoleOrganizer | config.RoleAdmin))
-
-	// CreateRegistrationHandler creates a registration
+	// CreateRegistrationHandler creates a registration (accessible by RoleUser)
 	// @Summary Create a registration
 	// @Description Adds a new registration to the database
 	// @Tags registrations
@@ -24,7 +21,7 @@ func SetupRegistrationRoutes(router *gin.Engine, db *gorm.DB) {
 	// @Security ApiKeyAuth
 	// @Success 201 {object} models.Registration
 	// @Router /registrations [post]
-	router.POST("/registrations", func(c *gin.Context) {
+	router.POST("/registrations", middlewares.AuthMiddleware(config.RoleUser), func(c *gin.Context) {
 		registrationController.CreateRegistration(c)
 	})
 
@@ -36,7 +33,7 @@ func SetupRegistrationRoutes(router *gin.Engine, db *gorm.DB) {
 	// @Security ApiKeyAuth
 	// @Success 200 {array} models.Registration
 	// @Router /registrations [get]
-	router.GET("/registrations", func(c *gin.Context) {
+	router.GET("/registrations", middlewares.AuthMiddleware(config.RoleUser), func(c *gin.Context) {
 		registrationController.GetRegistrations(c)
 	})
 
@@ -49,7 +46,7 @@ func SetupRegistrationRoutes(router *gin.Engine, db *gorm.DB) {
 	// @Security ApiKeyAuth
 	// @Success 200 {object} models.Registration
 	// @Router /registrations/{id} [get]
-	router.GET("/registrations/:id", func(c *gin.Context) {
+	router.GET("/registrations/:id", middlewares.AuthMiddleware(config.RoleUser), func(c *gin.Context) {
 		registrationController.GetRegistration(c)
 	})
 
@@ -64,7 +61,7 @@ func SetupRegistrationRoutes(router *gin.Engine, db *gorm.DB) {
 	// @Security ApiKeyAuth
 	// @Success 200 {object} models.Registration
 	// @Router /registrations/{id} [patch]
-	router.PATCH("/registrations/:id", func(c *gin.Context) {
+	router.PATCH("/registrations/:id", middlewares.AuthMiddleware(config.RoleUser), func(c *gin.Context) {
 		registrationController.UpdateRegistration(c)
 	})
 }

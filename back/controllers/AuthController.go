@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -40,6 +41,7 @@ func NewUserController(db *gorm.DB, storageService *services.StorageService) *Us
 // @Router /user/login [post]
 func (ctrl *UserController) Login(c *gin.Context) {
 	var credentials models.UserLogin
+	log.Println("Login")
 	if err := c.ShouldBindJSON(&credentials); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request", "details": err.Error()})
 		return

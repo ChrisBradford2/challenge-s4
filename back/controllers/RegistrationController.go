@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"challenges4/config"
 	"challenges4/models"
+	"challenges4/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -28,10 +30,38 @@ func NewRegistrationController(db *gorm.DB) *RegistrationController {
 // @Failure 500 {object} string "Internal server error"
 // @Router /registrations [post]
 func (ctrl *RegistrationController) CreateRegistration(c *gin.Context) {
-	var registration models.Registration
-	if err := c.ShouldBindJSON(&registration); err != nil {
+	var registrationCreate models.RegistrationCreate
+	if err := c.ShouldBindJSON(&registrationCreate); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
+		return
+	}
+
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
+		return
+	}
+
+	var user models.User
+	if err := ctrl.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	registration := models.RegistrationCreate{
+		UserID:  userID,
+		TeamID:  registrationCreate.TeamID,
+		IsValid: user.Roles == config.RoleOrganizer || user.Roles == config.RoleAdmin,
 	}
 
 	if result := ctrl.DB.Create(&registration); result.Error != nil {
@@ -49,26 +79,81 @@ func (ctrl *RegistrationController) CreateRegistration(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Registration ID"
-// @Param registration body models.Registration true "Registration object"
+// @Param registration body models.RegistrationUpdate true "Registration update object"
 // @Security ApiKeyAuth
 // @Success 200 {object} models.Registration "Successfully updated registration"
 // @Failure 400 {object} string "Bad request"
+// @Failure 401 {object} string "Unauthorized"
 // @Failure 404 {object} string "Registration not found"
 // @Failure 500 {object} string "Internal server error"
 // @Router /registrations/{id} [patch]
 func (ctrl *RegistrationController) UpdateRegistration(c *gin.Context) {
-	var registration models.Registration
-	if err := c.ShouldBindJSON(&registration); err != nil {
+	registrationID := c.Param("id")
+	var existingRegistration models.Registration
+	if err := ctrl.DB.First(&existingRegistration, registrationID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Registration not found"})
+		return
+	}
+
+	var registrationUpdate models.RegistrationUpdate
+	if err := c.ShouldBindJSON(&registrationUpdate); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if result := ctrl.DB.Save(&registration); result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": registration})
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
+		return
+	}
+
+	var user models.User
+	if err := ctrl.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var team models.Team
+	if err := ctrl.DB.First(&team, existingRegistration.TeamID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
+		return
+	}
+
+	if team.HackathonID == nil || !isHackathonOrganizer(ctrl.DB, *team.HackathonID, userID) && user.Roles != config.RoleAdmin {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Unauthorized to update registration"})
+		return
+	}
+
+	if err := ctrl.DB.Model(&existingRegistration).Updates(registrationUpdate).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update registration"})
+		return
+	}
+
+	if registrationUpdate.IsValid {
+		// Add the user to the team's users association
+		if err := ctrl.DB.Model(&team).Association("Users").Append(&user); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user to the team"})
+			return
+		}
+	} else {
+		// Remove the user from the team's users association
+		if err := ctrl.DB.Model(&team).Association("Users").Delete(&user); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove user from the team"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": existingRegistration})
 }
 
 // GetRegistrations godoc
@@ -84,11 +169,66 @@ func (ctrl *RegistrationController) UpdateRegistration(c *gin.Context) {
 // @Router /registrations [get]
 func (ctrl *RegistrationController) GetRegistrations(c *gin.Context) {
 	var registrations []models.Registration
-	query := ctrl.DB
 
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
+		return
+	}
+
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
+		return
+	}
+
+	var user models.User
+	if err := ctrl.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if user.Roles == config.RoleAdmin {
+		query := ctrl.DB
+		applyFilters(c, query)
+
+		if result := query.Find(&registrations); result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+			return
+		}
+	} else {
+		var hackathons []models.Hackathon
+		if result := ctrl.DB.Where("organizer_id = ?", userID).Find(&hackathons); result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+			return
+		}
+
+		var teams []models.Team
+		if result := ctrl.DB.Find(&teams).Where("hackathon_id IN ?", hackathons); result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+			return
+		}
+
+		query := ctrl.DB.Where("team_id IN ?", teams)
+		applyFilters(c, query)
+
+		if result := query.Find(&registrations); result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": registrations})
+}
+
+func applyFilters(c *gin.Context, query *gorm.DB) {
 	// Get query parameters
 	teamID := c.Query("teamId")
-	user := c.Query("user")
+	targetUser := c.Query("user")
 	status := c.Query("status")
 
 	// Apply filters based on query parameters
@@ -98,18 +238,12 @@ func (ctrl *RegistrationController) GetRegistrations(c *gin.Context) {
 			query = query.Where("team_id = ?", tid)
 		}
 	}
-	if user != "" {
-		query = query.Where("user = ?", user)
+	if targetUser != "" {
+		query = query.Where("user = ?", targetUser)
 	}
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-
-	if result := query.Find(&registrations); result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": registrations})
 }
 
 // GetRegistration godoc

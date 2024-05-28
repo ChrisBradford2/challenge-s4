@@ -1,19 +1,23 @@
 package models
 
-import "google.golang.org/genproto/googleapis/type/date"
+import (
+	"google.golang.org/genproto/googleapis/type/date"
+)
 
 type Hackathon struct {
 	Base
-	Name            string `json:"name" gorm:"not null"`
-	Description     string `json:"description"`
-	Location        string `json:"location"`
-	MaxParticipants int    `json:"max_participants"`
-	CreatedByID     *uint  `json:"created_by_id"`
-	CreatedBy       *User  `gorm:"foreignKey:CreatedByID"`
-	Teams           []Team `gorm:"many2many:hackathon_teams;"`
-	StartDate       string `json:"start_date"`
-	EndDate         string `json:"end_date"`
-	HackathonFiles  []File `json:"hackathon_files" gorm:"foreignKey:HackathonID"`
+	Name            string          `json:"name" gorm:"not null"`
+	Description     string          `json:"description"`
+	Location        string          `json:"location"`
+	MaxParticipants int             `json:"max_participants"`
+	CreatedByID     *uint           `json:"created_by_id"`
+	CreatedBy       *User           `gorm:"foreignKey:CreatedByID"`
+	Teams           []Team          `gorm:"many2many:hackathon_teams;"`
+	StartDate       string          `json:"start_date"`
+	EndDate         string          `json:"end_date"`
+	IsActive        bool            `json:"is_active" gorm:"default:0"`
+	HackathonFiles  []File          `json:"hackathon_files" gorm:"foreignKey:HackathonID"`
+	Participations  []Participation `gorm:"foreignKey:HackathonID"` // Many-to-many relationship with User through Participation
 }
 
 type HackathonCreate struct {

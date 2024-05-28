@@ -74,6 +74,7 @@ func main() {
 	// Default route
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "hello, gin-zerolog example")
+		log.Println("Hello, gin-zerolog example")
 	})
 
 	// Swagger documentation
@@ -94,6 +95,10 @@ func main() {
 
 	if err := seeders.SeedUsers(db); err != nil {
 		log.Fatal("Failed to seed users: ", err)
+	}
+
+	if err := seeders.SeedHackathons(db); err != nil {
+		log.Fatal("Failed to seed hackathons: ", err)
 	}
 
 	// Start server
