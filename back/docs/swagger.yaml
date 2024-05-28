@@ -1,11 +1,72 @@
 definitions:
+  date.Date:
+    properties:
+      day:
+        description: |-
+          Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+          to specify a year by itself or a year and month where the day isn't
+          significant.
+        type: integer
+      month:
+        description: |-
+          Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+          month and day.
+        type: integer
+      year:
+        description: |-
+          Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+          a year.
+        type: integer
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
   models.ErrorResponse:
     properties:
       error:
         type: string
     type: object
+  models.File:
+    properties:
+      contentType:
+        description: File content type
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      hackathon_id:
+        description: Foreign key for Hackathon
+        type: integer
+      id:
+        type: integer
+      lastModified:
+        description: Last modified date
+        type: string
+      name:
+        description: Filename
+        type: string
+      size:
+        description: File size in bytes
+        type: integer
+      updatedAt:
+        type: string
+      url:
+        description: URL to download the file from Google Cloud Storage
+        type: string
+      userId:
+        description: User ID
+        type: string
+    type: object
   models.Hackathon:
     properties:
+      created_by_id:
+        type: integer
       createdAt:
         type: string
       createdBy:
@@ -14,17 +75,30 @@ definitions:
         type: string
       description:
         type: string
-      endDate:
+      end_date:
         type: string
+      hackathon_files:
+        items:
+          $ref: '#/definitions/models.File'
+        type: array
       id:
         type: integer
+      is_active:
+        type: boolean
       location:
         type: string
-      maxParticipants:
+      max_participants:
         type: integer
       name:
         type: string
-      startDate:
+      nb_of_teams:
+        type: integer
+      participations:
+        description: Many-to-many relationship with User through Participation
+        items:
+          $ref: '#/definitions/models.Participation'
+        type: array
+      start_date:
         type: string
       teams:
         items:
@@ -34,19 +108,26 @@ definitions:
         type: string
     type: object
   models.HackathonCreate:
+    type: object
+  models.Participation:
     properties:
-      description:
-        example: Un événement pour les développeurs
+      createdAt:
         type: string
-      location:
-        example: Paris
-        type: string
-      maxParticipants:
-        example: 100
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      hackathonID:
+        description: Foreign key referencing Hackathon.ID
         type: integer
-      name:
-        example: Hackathon de Paris
+      id:
+        type: integer
+      isOrganizer:
+        description: Indicates if the user is an organizer of the hackathon
+        type: boolean
+      updatedAt:
         type: string
+      userID:
+        description: Foreign key referencing User.ID
+        type: integer
     type: object
   models.PublicUser:
     properties:
@@ -69,8 +150,9 @@ definitions:
         type: string
       id:
         type: integer
-      status:
-        type: string
+      is_valid:
+        example: false
+        type: boolean
       team:
         allOf:
         - $ref: '#/definitions/models.Team'
@@ -88,12 +170,42 @@ definitions:
         description: Foreign key referencing User.ID
         type: integer
     type: object
+  models.RegistrationUpdate:
+    properties:
+      is_valid:
+        example: true
+        type: boolean
+    type: object
+  models.Skill:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+      users:
+        description: Many-to-many relationship with User
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
   models.Team:
     properties:
       createdAt:
         type: string
       deletedAt:
         type: string
+      hackathon:
+        $ref: '#/definitions/models.Hackathon'
+      hackathon_id:
+        type: integer
       id:
         type: integer
       name:
@@ -116,8 +228,12 @@ definitions:
     type: object
   models.User:
     properties:
+      created_by_id:
+        type: integer
       createdAt:
         type: string
+      createdBy:
+        $ref: '#/definitions/models.User'
       deletedAt:
         type: string
       email:
@@ -131,6 +247,11 @@ definitions:
       last_name:
         example: Doe
         type: string
+      participations:
+        description: Many-to-many relationship with Hackathon through Participation
+        items:
+          $ref: '#/definitions/models.Participation'
+        type: array
       password:
         example: password
         type: string
@@ -140,6 +261,11 @@ definitions:
         description: 0 = user, 2 = organizer, 4 = admin
         example: 0
         type: integer
+      skills:
+        description: Many-to-many relationship with Skill
+        items:
+          $ref: '#/definitions/models.Skill'
+        type: array
       team:
         allOf:
         - $ref: '#/definitions/models.Team'
@@ -318,6 +444,44 @@ paths:
       summary: Mettre à jour un hackathon
       tags:
       - hackathons
+  /hackathons/{id}/register:
+    post:
+      description: Enregistre un utilisateur à un hackathon par son ID
+      parameters:
+      - description: ID du Hackathon
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Inscription réussie
+          schema:
+            type: boolean
+      security:
+      - ApiKeyAuth: []
+      summary: Enregistrer un utilisateur à un hackathon
+      tags:
+      - hackathons
+  /hackathons/{id}/teammate/search:
+    post:
+      description: Recherche un coéquipier pour un hackathon
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PublicUser'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Rechercher un coéquipier
+      tags:
+      - hackathons
   /registrations:
     get:
       description: Retrieves registrations from the database with optional filtering
@@ -418,12 +582,12 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Registration object
+      - description: Registration update object
         in: body
         name: registration
         required: true
         schema:
-          $ref: '#/definitions/models.Registration'
+          $ref: '#/definitions/models.RegistrationUpdate'
       produces:
       - application/json
       responses:
@@ -433,6 +597,10 @@ paths:
             $ref: '#/definitions/models.Registration'
         "400":
           description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "404":

@@ -233,6 +233,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/hackathons/{id}/register": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Enregistre un utilisateur à un hackathon par son ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hackathons"
+                ],
+                "summary": "Enregistrer un utilisateur à un hackathon",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID du Hackathon",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inscription réussie",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "/hackathons/{id}/teammate/search": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Recherche un coéquipier pour un hackathon",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hackathons"
+                ],
+                "summary": "Rechercher un coéquipier",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.PublicUser"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/registrations": {
             "get": {
                 "security": [
@@ -400,12 +462,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Registration object",
+                        "description": "Registration update object",
                         "name": "registration",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Registration"
+                            "$ref": "#/definitions/models.RegistrationUpdate"
                         }
                     }
                 ],
@@ -418,6 +480,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
@@ -1004,10 +1072,84 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "date.Date": {
+            "type": "object",
+            "properties": {
+                "day": {
+                    "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0\nto specify a year by itself or a year and month where the day isn't\nsignificant.",
+                    "type": "integer"
+                },
+                "month": {
+                    "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a\nmonth and day.",
+                    "type": "integer"
+                },
+                "year": {
+                    "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without\na year.",
+                    "type": "integer"
+                }
+            }
+        },
+        "gorm.DeletedAt": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
         "models.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.File": {
+            "type": "object",
+            "properties": {
+                "contentType": {
+                    "description": "File content type",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "hackathon_id": {
+                    "description": "Foreign key for Hackathon",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastModified": {
+                    "description": "Last modified date",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Filename",
+                    "type": "string"
+                },
+                "size": {
+                    "description": "File size in bytes",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL to download the file from Google Cloud Storage",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "User ID",
                     "type": "string"
                 }
             }
@@ -1021,28 +1163,50 @@ const docTemplate = `{
                 "createdBy": {
                     "$ref": "#/definitions/models.User"
                 },
+                "created_by_id": {
+                    "type": "integer"
+                },
                 "deletedAt": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
-                "endDate": {
+                "end_date": {
                     "type": "string"
+                },
+                "hackathon_files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.File"
+                    }
                 },
                 "id": {
                     "type": "integer"
                 },
+                "is_active": {
+                    "type": "boolean"
+                },
                 "location": {
                     "type": "string"
                 },
-                "maxParticipants": {
+                "max_participants": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
-                "startDate": {
+                "nb_of_teams": {
+                    "type": "integer"
+                },
+                "participations": {
+                    "description": "Many-to-many relationship with User through Participation",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Participation"
+                    }
+                },
+                "start_date": {
                     "type": "string"
                 },
                 "teams": {
@@ -1057,23 +1221,34 @@ const docTemplate = `{
             }
         },
         "models.HackathonCreate": {
+            "type": "object"
+        },
+        "models.Participation": {
             "type": "object",
             "properties": {
-                "description": {
-                    "type": "string",
-                    "example": "Un événement pour les développeurs"
+                "createdAt": {
+                    "type": "string"
                 },
-                "location": {
-                    "type": "string",
-                    "example": "Paris"
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
                 },
-                "maxParticipants": {
-                    "type": "integer",
-                    "example": 100
+                "hackathonID": {
+                    "description": "Foreign key referencing Hackathon.ID",
+                    "type": "integer"
                 },
-                "name": {
-                    "type": "string",
-                    "example": "Hackathon de Paris"
+                "id": {
+                    "type": "integer"
+                },
+                "isOrganizer": {
+                    "description": "Indicates if the user is an organizer of the hackathon",
+                    "type": "boolean"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "description": "Foreign key referencing User.ID",
+                    "type": "integer"
                 }
             }
         },
@@ -1109,8 +1284,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "status": {
-                    "type": "string"
+                "is_valid": {
+                    "type": "boolean",
+                    "example": false
                 },
                 "team": {
                     "description": "Belongs to Team",
@@ -1141,6 +1317,45 @@ const docTemplate = `{
                 }
             }
         },
+        "models.RegistrationUpdate": {
+            "type": "object",
+            "properties": {
+                "is_valid": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "models.Skill": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "users": {
+                    "description": "Many-to-many relationship with User",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                }
+            }
+        },
         "models.Team": {
             "type": "object",
             "required": [
@@ -1152,6 +1367,12 @@ const docTemplate = `{
                 },
                 "deletedAt": {
                     "type": "string"
+                },
+                "hackathon": {
+                    "$ref": "#/definitions/models.Hackathon"
+                },
+                "hackathon_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1192,6 +1413,12 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
+                "createdBy": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "created_by_id": {
+                    "type": "integer"
+                },
                 "deletedAt": {
                     "type": "string"
                 },
@@ -1210,6 +1437,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Doe"
                 },
+                "participations": {
+                    "description": "Many-to-many relationship with Hackathon through Participation",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Participation"
+                    }
+                },
                 "password": {
                     "type": "string",
                     "example": "password"
@@ -1221,6 +1455,13 @@ const docTemplate = `{
                     "description": "0 = user, 2 = organizer, 4 = admin",
                     "type": "integer",
                     "example": 0
+                },
+                "skills": {
+                    "description": "Many-to-many relationship with Skill",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Skill"
+                    }
                 },
                 "team": {
                     "description": "Belongs to Team",

@@ -55,11 +55,14 @@ func main() {
 	if err := db.AutoMigrate(&models.User{}); err != nil {
 		log.Fatal("Failed to migrate users: ", err)
 	}
-	if err := db.AutoMigrate(&models.Registration{}); err != nil {
-		log.Fatal("Failed to migrate registrations: ", err)
-	}
 	if err := db.AutoMigrate(&models.File{}); err != nil {
 		log.Fatal("Failed to migrate files: ", err)
+	}
+	if err := db.AutoMigrate(&models.Skill{}); err != nil {
+		log.Fatal("Failed to migrate skills: ", err)
+	}
+	if err := db.AutoMigrate(&models.Participation{}); err != nil {
+		log.Fatal("Failed to migrate participations: ", err)
 	}
 	log.Println("Database migrated!")
 
@@ -89,7 +92,6 @@ func main() {
 	// Setup routes
 	routes.UserRoutes(r, db, storageService)
 	routes.SetupTeamRoutes(r, db)
-	routes.SetupRegistrationRoutes(r, db)
 	routes.HackathonRoutes(r, db)
 	routes.FileRoutes(r, os.Getenv("GCP_CREDS"))
 
@@ -99,6 +101,10 @@ func main() {
 
 	if err := seeders.SeedHackathons(db); err != nil {
 		log.Fatal("Failed to seed hackathons: ", err)
+	}
+
+	if err := seeders.SeedSkills(db); err != nil {
+		log.Fatal("Failed to seed skills: ", err)
 	}
 
 	// Start server
