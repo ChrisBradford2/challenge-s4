@@ -2,30 +2,29 @@ import 'package:bloc/bloc.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../../utils/config.dart';
 import 'hackathon_event.dart';
 import 'hackathon_state.dart';
 
-// States
-
 // BLoC
 class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
-  HackathonBloc() : super(HackathonInitial());
+  HackathonBloc() : super(HackathonInitial()) {
+    on<FetchHackathons>(_onFetchHackathons);
+  }
 
-  Stream<HackathonState> mapEventToState(HackathonEvent event) async* {
-    if (event is FetchHackathons) {
-      yield HackathonLoading();
-      try {
-        final hackathons = await _fetchHackathons(event.token);
-        yield HackathonLoaded(hackathons);
-      } catch (e) {
-        yield HackathonError(e.toString());
-      }
+  void _onFetchHackathons(FetchHackathons event, Emitter<HackathonState> emit) async {
+    emit(HackathonLoading());
+    try {
+      final hackathons = await _fetchHackathons(event.token);
+      emit(HackathonLoaded(hackathons));
+    } catch (e) {
+      emit(HackathonError(e.toString()));
     }
   }
 
   Future<List<Map<String, String>>> _fetchHackathons(String token) async {
     final response = await http.get(
-      Uri.parse('https://localhost/hackathon'),
+      Uri.parse('${Config.baseUrl}/hackathons'),
       headers: {'Authorization': 'Bearer $token'},
     );
 

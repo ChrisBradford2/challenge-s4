@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:front/screens/home_screen.dart';
 import 'package:front/screens/login/login_screen.dart';
+import 'package:front/screens/profile/profile_screen.dart';
 import 'package:front/services/logout/logout_bloc.dart';
 import 'package:front/services/logout/logout_state.dart';
 import 'package:front/utils/config.dart';
@@ -85,6 +86,15 @@ class MyApp extends StatelessWidget {
         localizationsDelegates: Config.localizationsDelegates,
         initialRoute: '/',
         routes: getApplicationRoutes(),
+        onGenerateRoute: (settings) {
+          if (settings.name == '/profile') {
+            final String token = settings.arguments as String;
+            return MaterialPageRoute(
+              builder: (context) => ProfileScreen(token: token),
+            );
+          }
+          return unknownRoute(settings);
+        },
         onUnknownRoute: unknownRoute,
         supportedLocales: const [
           Locale('en', ''),
