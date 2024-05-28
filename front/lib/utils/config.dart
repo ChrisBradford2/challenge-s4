@@ -16,7 +16,7 @@ import '../services/register/register_bloc.dart';
 
 class Config {
   static String baseUrl =
-      Platform.isAndroid ? "http://10.0.2.2:8080" : "http://localhost:8080";
+      Platform.isAndroid ? "https://10.0.2.2" : "https://localhost";
   static List<LocalizationsDelegate> localizationsDelegates = [
     AppLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,

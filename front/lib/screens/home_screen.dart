@@ -1,44 +1,39 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 
 import '../services/logout/logout_bloc.dart';
 import '../services/logout/logout_event.dart';
 import '../services/logout/logout_state.dart';
 import '../services/user_service.dart';
+import '../utils/config.dart';
 
 class HomeScreen extends StatelessWidget {
   final String token;
 
-  HomeScreen({super.key, required this.token});
+  const HomeScreen({super.key, required this.token});
 
-  // @todo Delete this when the backend is ready
-  final List<Map<String, String>> hackathons = [
-    {
-      "name": "Hackathon Innovate",
-      "date": "2024-06-15",
-      "location": "Paris, France"
-    },
-    {
-      "name": "Code Challenge",
-      "date": "2024-07-20",
-      "location": "San Francisco, CA"
-    },
-    {
-      "name": "Developers Fest",
-      "date": "2024-08-12",
-      "location": "Berlin, Germany"
-    },
-    {
-      "name": "Tech Creators",
-      "date": "2024-09-05",
-      "location": "Tokyo, Japan"
-    },
-    {
-      "name": "Global DevCon",
-      "date": "2024-10-10",
-      "location": "New York, NY"
+  Future<List<Map<String, String>>> fetchHackathons() async {
+    final response = await http.get(
+      Uri.parse('${Config.baseUrl}/hackathons'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body)['data'];
+      return data.map((item) {
+        return {
+          "name": item["name"].toString(),
+          "date": item["start_date"].toString(),
+          "location": item["location"].toString(),
+        };
+      }).toList();
+    } else {
+      throw Exception('Failed to load hackathons');
     }
-  ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +49,8 @@ class HomeScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Accueil"),
         ),
-        body: FutureBuilder<String>(
-          future: userService.fetchFirstName(token),
+        body: FutureBuilder<List<Map<String, String>>>(
+          future: fetchHackathons(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasError) {
@@ -66,16 +61,28 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      "Salut ${snapshot.data}, content de te revoir !",
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    child: FutureBuilder<String>(
+                      future: userService.fetchFirstName(token),
+                      builder: (context, userSnapshot) {
+                        if (userSnapshot.connectionState == ConnectionState.done) {
+                          if (userSnapshot.hasError) {
+                            return Center(child: Text("Error: ${userSnapshot.error}"));
+                          }
+                          return Text(
+                            "Salut ${userSnapshot.data}, content de te revoir !",
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          );
+                        } else {
+                          return const CircularProgressIndicator();
+                        }
+                      },
                     ),
                   ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: hackathons.length,
+                      itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
-                        var hackathon = hackathons[index];
+                        var hackathon = snapshot.data![index];
                         return ListTile(
                           title: Text(hackathon["name"]!),
                           subtitle: Text("${hackathon["date"]} - ${hackathon["location"]}"),
@@ -84,6 +91,7 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                   ),
+                  /*
                   FloatingActionButton(
                     onPressed: () {
                       showDialog(
@@ -110,6 +118,12 @@ class HomeScreen extends StatelessWidget {
                           );
                         },
                       );
+                    },
+                    child: const Icon(Icons.person),
+                  ),*/
+                  FloatingActionButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/profile');
                     },
                     child: const Icon(Icons.person),
                   ),

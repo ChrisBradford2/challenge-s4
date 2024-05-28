@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +20,20 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  HttpOverrides.global = MyHttpOverrides();
+
+  try {
+    if (!kIsWeb) {
+      if (kDebugMode) {
+        print(Platform.operatingSystem);
+      }
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Platform not available: $e');
+    }
+  }
 
   // Splash persistance jusqu'à l'initialisation
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -45,6 +60,14 @@ Future<void> main() async {
   await FirebaseFirestore.instance.clearPersistence();
 
   runApp(MyApp(theme: theme));
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
 }
 
 class MyApp extends StatelessWidget {
