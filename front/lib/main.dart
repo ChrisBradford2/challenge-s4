@@ -62,6 +62,18 @@ Future<void> main() async {
   );
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  const AndroidNotificationDetails androidNotificationDetails =
+  AndroidNotificationDetails('your channel id', 'your channel name',
+      channelDescription: 'your channel description',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker');
+  const NotificationDetails notificationDetails =
+  NotificationDetails(android: androidNotificationDetails);
+  flutterLocalNotificationsPlugin.show(
+      0, 'plain title', 'plain body', notificationDetails,
+      payload: 'item x');
   // Fin de l'écran splash
   FlutterNativeSplash.remove();
 

@@ -65,8 +65,14 @@ class LoginPage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   // Schedule a notification in 10 seconds
+                  print('pressed');
                   final now = DateTime.now();
                   final scheduledTime = now.add(Duration(seconds: 1));
+                  print({
+                    scheduledTime,
+                    'Reminder',
+                    'This is a scheduled notification'
+                  });
                   context.read<NotificationBloc>().add(ScheduleNotification(
                       scheduledTime,
                       'Reminder',

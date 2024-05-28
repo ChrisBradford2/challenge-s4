@@ -38,12 +38,12 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       event.body,
       scheduledTime,
       platformDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dateAndTime,
     );
-
+    print(event);
     emit(NotificationScheduled(event.scheduledTime));
   }
 }
