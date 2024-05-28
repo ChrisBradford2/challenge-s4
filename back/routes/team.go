@@ -80,4 +80,38 @@ func SetupTeamRoutes(router *gin.Engine, db *gorm.DB) {
 	router.DELETE("/teams/:id", func(c *gin.Context) {
 		teamController.DeleteTeam(c)
 	})
+
+	// RegisterToTeamHandler registers a user to a team
+	// @Summary Register to a team
+	// @Description Register to a team by ID
+	// @Tags teams
+	// @Produce  json
+	// @Param id path int true "Team ID"
+	// @Security ApiKeyAuth
+	// @Success 200 {object} models.Team "Successfully registered to team"
+	// @Failure 400 {object} string "User is already in a team or Team is already full"
+	// @Failure 401 {object} string "Unauthorized: No authorization token provided or invalid token"
+	// @Failure 404 {object} string "Team not found or User not found"
+	// @Failure 500 {object} string "Internal server error"
+	// @Router /teams/{id}/register [post]
+	router.POST("/teams/:id/register", func(c *gin.Context) {
+		teamController.RegisterToTeam(c)
+	})
+
+	// LeaveTeamHandler removes a user from a team
+	// @Summary Leave a team
+	// @Description Leave a team by ID
+	// @Tags teams
+	// @Produce  json
+	// @Param id path int true "Team ID"
+	// @Security ApiKeyAuth
+	// @Success 200 {object} string "Successfully left team"
+	// @Failure 400 {object} string "User is not in the target team"
+	// @Failure 401 {object} string "Unauthorized: No authorization token provided or invalid token"
+	// @Failure 404 {object} string "Team not found or User not found"
+	// @Failure 500 {object} string "Internal server error"
+	// @Router /teams/{id}/leave [post]
+	router.POST("/teams/:id/leave", func(c *gin.Context) {
+		teamController.LeaveTeam(c)
+	})
 }

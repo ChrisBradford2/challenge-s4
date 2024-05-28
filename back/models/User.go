@@ -15,7 +15,8 @@ type User struct {
 	Roles          uint8           `json:"roles" example:"0"`                       // 0 = user, 2 = organizer, 4 = admin
 	CreatedByID    *uint           `json:"created_by_id"`
 	CreatedBy      *User           `gorm:"foreignKey:CreatedByID"`
-	Participations []Participation `gorm:"foreignKey:UserID"` // Many-to-many relationship with Hackathon through Participation
+	Participations []Participation `gorm:"foreignKey:UserID"`      // Many-to-many relationship with Hackathon through Participation
+	Skills         []Skill         `gorm:"many2many:user_skills;"` // Many-to-many relationship with Skill
 }
 
 type UserRegister struct {

@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"challenges4/config"
 	"challenges4/models"
 	"challenges4/services"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -79,7 +81,74 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 // @Router /hackathons [get]
 func GetHackathons(c *gin.Context, db *gorm.DB) {
 	var hackathons []models.Hackathon
-	if result := db.Find(&hackathons); result.Error != nil {
+
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No authorization token provided"})
+		return
+	}
+
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
+		return
+	}
+
+	var user models.User
+	if err := db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	isActive := c.Query("active")
+	query := db.Model(&models.Hackathon{})
+
+	if user.Roles != config.RoleAdmin {
+		query = query.Joins("JOIN participations ON hackathons.id = participations.hackathon_id").
+			Where("participations.user_id = ?", user.ID)
+	}
+
+	if isActive != "" {
+		query = db.Where("is_active = ?", isActive)
+	}
+
+	if result := query.Find(&hackathons); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": hackathons})
+}
+
+func SearchHackathons(c *gin.Context, db *gorm.DB) {
+	var searchCriteria struct {
+		Longitude float64 `json:"longitude"`
+		Latitude  float64 `json:"latitude"`
+		Distance  float64 `json:"distance"`
+	}
+
+	if err := c.ShouldBindJSON(&searchCriteria); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	query := db.Model(&models.Hackathon{})
+
+	if searchCriteria.Longitude != 0 && searchCriteria.Latitude != 0 {
+		query = query.Select("*, ST_DistanceSphere(location, ST_MakePoint(?, ?)) as distance", searchCriteria.Longitude, searchCriteria.Latitude).
+			Order("distance")
+
+		if searchCriteria.Distance != 0 {
+			query = query.Where("ST_DistanceSphere(location, ST_MakePoint(?, ?)) <= ?", searchCriteria.Longitude, searchCriteria.Latitude, searchCriteria.Distance)
+		}
+	}
+
+	var hackathons []models.Hackathon
+	if result := query.Find(&hackathons); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
@@ -110,6 +179,50 @@ func UpdateHackathon(c *gin.Context, db *gorm.DB) {
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	var currentHackathon models.Hackathon
+	if err := db.First(&currentHackathon, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+		return
+	}
+
+	if currentHackathon.NbOfTeams != input.NbOfTeams {
+		if currentHackathon.IsActive {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot change number of teams for an active hackathon"})
+			return
+		} else {
+			// Unlink and delete the excess teams
+			if input.NbOfTeams < currentHackathon.NbOfTeams {
+				var teams []models.Team
+				if err := db.Where("hackathon_id = ?", currentHackathon.ID).Limit(currentHackathon.NbOfTeams - input.NbOfTeams).Find(&teams).Error; err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch teams"})
+					return
+				}
+
+				for _, team := range teams {
+					if err := db.Model(&team).Update("hackathon_id", nil).Error; err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlink team from hackathon"})
+						return
+					}
+					if err := db.Delete(&team).Error; err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete team"})
+						return
+					}
+				}
+			} else {
+				for i := currentHackathon.NbOfTeams + 1; i <= input.NbOfTeams; i++ {
+					team := &models.Team{
+						Name:        fmt.Sprintf("Team %d of hackathon: %s", i, currentHackathon.Name),
+						HackathonID: &hackathon.ID,
+					}
+					if err := db.Create(team).Error; err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create team"})
+						return
+					}
+				}
+			}
+		}
 	}
 
 	db.Model(&hackathon).Updates(input)
@@ -194,4 +307,42 @@ func isHackathonOrganizer(db *gorm.DB, hackathonID uint, userID uint) bool {
 	}
 
 	return participation.IsOrganizer
+}
+
+func SearchParticipants(c *gin.Context, db *gorm.DB) ([]models.User, error) {
+
+	hackathonID := c.Param("id")
+
+	var participantFilter models.ParticipationFilter
+	if err := c.ShouldBindJSON(&participantFilter); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return nil, err
+	}
+
+	var users []models.User
+	queryBuilder := db.Joins("JOIN participations ON users.id = participations.user_id")
+
+	if participantFilter.SkillID != 0 {
+		queryBuilder = queryBuilder.Joins("JOIN user_skills ON users.id = user_skills.user_id")
+	}
+
+	queryBuilder = queryBuilder.Where("participations.hackathon_id = ?", hackathonID)
+
+	if participantFilter.Username != "" {
+		queryBuilder = queryBuilder.Where("users.username LIKE ?", "%"+participantFilter.Username+"%")
+	}
+
+	if participantFilter.Email != "" {
+		queryBuilder = queryBuilder.Where("users.email LIKE ?", "%"+participantFilter.Email+"%")
+	}
+
+	if participantFilter.SkillID != 0 {
+		queryBuilder = queryBuilder.Where("user_skills.skill_id = ?", participantFilter.SkillID)
+	}
+
+	if result := queryBuilder.Find(&users); result.Error != nil {
+		return nil, result.Error
+	}
+
+	return users, nil
 }
