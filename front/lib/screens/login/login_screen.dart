@@ -4,6 +4,9 @@ import '../../services/login/login_bloc.dart';
 import '../../services/login/login_event.dart';
 import '../../services/login/login_state.dart';
 import '../main_screen.dart';
+import '../../services/notification/notification_event.dart';
+import '../../services/notification/notification_bloc.dart';
+import '../home_screen.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -58,6 +61,22 @@ class LoginPage extends StatelessWidget {
                   Navigator.of(context).pushNamed('/register');
                 },
                 child: const Text('Register'),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Schedule a notification in 10 seconds
+                  final now = DateTime.now();
+                  final scheduledTime = now.add(Duration(seconds: 1));
+                  context.read<NotificationBloc>().add(ScheduleNotification(
+                      scheduledTime,
+                      'Reminder',
+                      'This is a scheduled notification'
+                  ));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Notification scheduled in 1 seconds')),
+                  );
+                },
+                child: const Text('Schedule Notification'),
               ),
             ],
           ),
