@@ -9,6 +9,32 @@ import (
 
 // CreateNotification creates a new notification
 func CreateNotification(c *gin.Context, db *gorm.DB) {
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
+		return
+	}
+
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
+		return
+	}
+
+	var user models.User
+	if err := db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	/*if !user.isOrganizer { // utilisateur lambda
+
+	}*/
+
 	var notification models.Notification
 
 	if err := c.ShouldBindJSON(&notification); err != nil {

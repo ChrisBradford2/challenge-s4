@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front/widgets/buttons/button_base.dart';
 
 import '../../services/login/login_bloc.dart';
 import '../../services/login/login_event.dart';
@@ -53,6 +54,19 @@ class LoginPage extends StatelessWidget {
                   ));
                 },
                 child: const Text('Login'),
+              ),
+              SizedBox(height: 20),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: ButtonBase(
+                  text: 'Login',
+                  onPressed: () {
+                    loginBloc.add(LoginButtonPressed(
+                      email: emailController.text,
+                      password: passwordController.text,
+                    ));
+                  },
+                ),
               ),
               TextButton(
                 onPressed: () {

@@ -7,4 +7,6 @@ type Notification struct {
 	CreatedByID *uint     `json:"created_by_id"`
 	CreatedBy   *User     `gorm:"foreignKey:CreatedByID"`
 	Message     string    `json:"message"`
+	IsSend      bool      `gorm:"default:false" json:"is_send"`
+	SendTo      string    `json:"send_to"`
 }
