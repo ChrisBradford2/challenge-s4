@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"challenges4/config"
 	"challenges4/models"
 	"challenges4/services"
 	"fmt"
@@ -18,7 +17,7 @@ import (
 // @Produce  json
 // @Param hackathon body models.HackathonCreate true "Hackathon object"
 // @Security ApiKeyAuth
-// @Success 200 {object} models.Hackathon "Successfully created Hackathon"
+// @Success 201 {object} models.Hackathon "Successfully created Hackathon"
 // @Failure 400 {object} string "Bad request"
 // @Failure 500 {object} string "Internal server error"
 // @Router /hackathons [post]
@@ -107,10 +106,12 @@ func GetHackathons(c *gin.Context, db *gorm.DB) {
 	isActive := c.Query("active")
 	query := db.Model(&models.Hackathon{})
 
-	if user.Roles != config.RoleAdmin {
-		query = query.Joins("JOIN participations ON hackathons.id = participations.hackathon_id").
-			Where("participations.user_id = ?", user.ID)
-	}
+	/*
+		if user.Roles != config.RoleAdmin {
+			query = query.Joins("JOIN participations ON hackathons.id = participations.hackathon_id").
+				Where("participations.user_id = ?", user.ID)
+		}
+	*/
 
 	if isActive != "" {
 		query = db.Where("is_active = ?", isActive)

@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"google.golang.org/genproto/googleapis/type/date"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +12,7 @@ type Hackathon struct {
 	Address         string          `json:"address"`
 	Longitude       float64         `json:"longitude"`
 	Latitude        float64         `json:"latitude"`
+	Location        string          `json:"location"`
 	MaxParticipants int             `json:"max_participants"`
 	CreatedByID     *uint           `json:"created_by_id"`
 	CreatedBy       *User           `gorm:"foreignKey:CreatedByID"`
@@ -26,16 +26,16 @@ type Hackathon struct {
 }
 
 type HackathonCreate struct {
-	Name            string    `json:"name" example:"Hackathon de Paris"`
-	Description     string    `json:"description" example:"Un événement pour les développeurs"`
-	Location        string    `json:"location" example:"Paris"`
-	MaxParticipants int       `json:"max_participants" example:"100"`
-	StartDate       date.Date `json:"start_date" example:"2021-01-01"`
-	EndDate         date.Date `json:"end_date" example:"2021-01-02"`
-	NbOfTeams       int       `json:"nb_of_teams" example:"0"`
-	Address         string    `json:"address" example:"Paris"`
-	Longitude       float64   `json:"longitude" example:"0.0"`
-	Latitude        float64   `json:"latitude" example:"0.0"`
+	Name            string  `json:"name" example:"Hackathon de Paris"`
+	Description     string  `json:"description" example:"Un événement pour les développeurs"`
+	Location        string  `json:"location" example:"Paris"`
+	MaxParticipants int     `json:"max_participants" example:"100"`
+	StartDate       string  `json:"start_date" example:"2021-01-01"`
+	EndDate         string  `json:"end_date" example:"2021-01-02"`
+	NbOfTeams       int     `json:"nb_of_teams" example:"0"`
+	Address         string  `json:"address" example:"Paris"`
+	Longitude       float64 `json:"longitude" example:"0.0"`
+	Latitude        float64 `json:"latitude" example:"0.0"`
 }
 
 type ParticipationFilter struct {

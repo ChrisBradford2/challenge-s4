@@ -203,154 +203,42 @@ const docTemplate = `{
                 }
             }
         },
-        "/registrations": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves registrations from the database with optional filtering based on teamid, user, and status",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registrations"
-                ],
-                "summary": "Get registrations with optional filters",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Filter by team ID",
-                        "name": "teamid",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by user",
-                        "name": "user",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by status",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Registration"
-                            }
-                        }
-                    }
-                }
-            },
+        "/hackathons/{id}/teammate/search": {
             "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Create a new registration",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Recherche un coéquipier pour un hackathon",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "registrations"
+                    "hackathons"
                 ],
-                "summary": "Create a new registration",
+                "summary": "Rechercher un coéquipier",
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved registration",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Registration"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.PublicUser"
+                            }
                         }
                     }
                 }
             }
         },
-        "/registrations/{id}": {
-            "get": {
+        "/steps": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieves a specific registration from the database",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registrations"
-                ],
-                "summary": "Get a registration",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Registration ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Registration"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Deletes a registration from the database",
-                "tags": [
-                    "registrations"
-                ],
-                "summary": "Delete a registration",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Registration ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            },
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update a registration by ID",
+                "description": "Create a new step for a hackathon",
                 "consumes": [
                     "application/json"
                 ],
@@ -358,32 +246,40 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "registrations"
+                    "steps"
                 ],
-                "summary": "Update a registration",
+                "summary": "Create a new step",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Registration ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Registration update object",
-                        "name": "registration",
+                        "description": "Step object",
+                        "name": "step",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RegistrationUpdate"
+                            "$ref": "#/definitions/models.StepCreate"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Successfully updated registration",
+                    "201": {
+                        "description": "Step created successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Registration"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.JSONResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Step"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -399,7 +295,92 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Registration not found",
+                        "description": "User not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/steps/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update a step by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "steps"
+                ],
+                "summary": "Update a step",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Step ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Step object",
+                        "name": "step",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.StepUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Step updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.JSONResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Step"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Step not found",
                         "schema": {
                             "type": "string"
                         }
@@ -621,6 +602,122 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Team not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/{id}/leave": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Leave a team by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "Leave a team",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully left team",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "User is not in the target team",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: No authorization token provided or invalid token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Team not found or User not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/{id}/register": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Register to a team by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "Register to a team",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully registered to team",
+                        "schema": {
+                            "$ref": "#/definitions/models.Team"
+                        }
+                    },
+                    "400": {
+                        "description": "User is already in a team or Team is already full",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: No authorization token provided or invalid token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Team not found or User not found",
                         "schema": {
                             "type": "string"
                         }
@@ -980,6 +1077,10 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "controllers.JSONResponse": {
+            "type": "object",
+            "additionalProperties": true
+        },
         "models.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -1036,10 +1137,13 @@ const docTemplate = `{
         "models.Hackathon": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "string"
                 },
-                "created_by": {
+                "createdBy": {
                     "$ref": "#/definitions/models.User"
                 },
                 "created_by_id": {
@@ -1049,12 +1153,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "description": {
-                    "type": "string",
-                    "example": "Un événement pour les développeurs"
+                    "type": "string"
                 },
                 "end_date": {
-                    "type": "string",
-                    "example": "2021-01-02"
+                    "type": "string"
                 },
                 "hackathon_files": {
                     "type": "array",
@@ -1068,17 +1170,23 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean"
                 },
+                "latitude": {
+                    "type": "number"
+                },
                 "location": {
-                    "type": "string",
-                    "example": "Paris"
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "number"
                 },
                 "max_participants": {
-                    "type": "integer",
-                    "example": 100
+                    "type": "integer"
                 },
                 "name": {
-                    "type": "string",
-                    "example": "Hackathon de Paris"
+                    "type": "string"
+                },
+                "nb_of_teams": {
+                    "type": "integer"
                 },
                 "participations": {
                     "description": "Many-to-many relationship with User through Participation",
@@ -1088,8 +1196,7 @@ const docTemplate = `{
                     }
                 },
                 "start_date": {
-                    "type": "string",
-                    "example": "2021-01-01"
+                    "type": "string"
                 },
                 "teams": {
                     "type": "array",
@@ -1105,6 +1212,10 @@ const docTemplate = `{
         "models.HackathonCreate": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "Paris"
+                },
                 "description": {
                     "type": "string",
                     "example": "Un événement pour les développeurs"
@@ -1113,9 +1224,17 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2021-01-02"
                 },
+                "latitude": {
+                    "type": "number",
+                    "example": 0
+                },
                 "location": {
                     "type": "string",
                     "example": "Paris"
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 0
                 },
                 "max_participants": {
                     "type": "integer",
@@ -1124,6 +1243,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Hackathon de Paris"
+                },
+                "nb_of_teams": {
+                    "type": "integer",
+                    "example": 0
                 },
                 "start_date": {
                     "type": "string",
@@ -1180,7 +1303,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Registration": {
+        "models.Skill": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1189,48 +1312,102 @@ const docTemplate = `{
                 "deletedAt": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "is_valid": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "team": {
-                    "description": "Belongs to Team",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.Team"
-                        }
-                    ]
-                },
-                "teamID": {
-                    "description": "Foreign key referencing Team.ID",
-                    "type": "integer"
+                "name": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
                 },
-                "user": {
-                    "description": "Belongs to User",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    ]
-                },
-                "userID": {
-                    "description": "Foreign key referencing User.ID",
-                    "type": "integer"
+                "users": {
+                    "description": "Many-to-many relationship with User",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
                 }
             }
         },
-        "models.RegistrationUpdate": {
+        "models.Step": {
             "type": "object",
             "properties": {
-                "is_valid": {
-                    "type": "boolean",
-                    "example": true
+                "createdAt": {
+                    "type": "string"
+                },
+                "dead_line_date": {
+                    "type": "string",
+                    "example": "2025-12-31T23:59:59Z"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "hackathon": {
+                    "$ref": "#/definitions/models.Hackathon"
+                },
+                "hackathon_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "position": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "type": "string",
+                    "example": "done"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Step 1"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.StepCreate": {
+            "type": "object",
+            "properties": {
+                "dead_line_date": {
+                    "type": "string",
+                    "example": "2025-12-31T23:59:59Z"
+                },
+                "hackathon_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "position": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Step 1"
+                }
+            }
+        },
+        "models.StepUpdate": {
+            "type": "object",
+            "properties": {
+                "dead_line_date": {
+                    "type": "string",
+                    "example": "2025-12-31T23:59:59Z"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "done"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Step 1"
                 }
             }
         },
@@ -1259,12 +1436,8 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Team 1"
                 },
-                "registrations": {
-                    "description": "Has many Registrations",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Registration"
-                    }
+                "nbOfMembers": {
+                    "type": "integer"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -1333,6 +1506,13 @@ const docTemplate = `{
                     "description": "0 = user, 2 = organizer, 4 = admin",
                     "type": "integer",
                     "example": 0
+                },
+                "skills": {
+                    "description": "Many-to-many relationship with Skill",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Skill"
+                    }
                 },
                 "team": {
                     "description": "Belongs to Team",
