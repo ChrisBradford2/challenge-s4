@@ -13,7 +13,7 @@ func SeedHackathons(db *gorm.DB) error {
 		{
 			Name:            "Hackathon de Paris",
 			Description:     "Un événement pour les développeurs",
-			Location:        "Paris",
+			Address:         "Paris",
 			MaxParticipants: 100,
 			StartDate:       "2021-01-01",
 			EndDate:         "2021-01-02",
@@ -21,7 +21,7 @@ func SeedHackathons(db *gorm.DB) error {
 		{
 			Name:            "Hackathon de Londres",
 			Description:     "Un événement pour les développeurs à Londres",
-			Location:        "Londres",
+			Address:         "Londres",
 			MaxParticipants: 150,
 			StartDate:       "2021-03-15",
 			EndDate:         "2021-03-17",
@@ -29,7 +29,7 @@ func SeedHackathons(db *gorm.DB) error {
 		{
 			Name:            "Hackathon de New York",
 			Description:     "Un événement pour les développeurs à New York",
-			Location:        "New York",
+			Address:         "New York",
 			MaxParticipants: 200,
 			StartDate:       "2021-06-10",
 			EndDate:         "2021-06-12",
