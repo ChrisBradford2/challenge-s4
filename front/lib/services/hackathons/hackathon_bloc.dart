@@ -11,6 +11,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
   HackathonBloc() : super(HackathonInitial()) {
     on<FetchHackathons>(_onFetchHackathons);
     on<FetchSingleHackathons>(_onFetchSingleHackathons);
+    on<AddHackathon>(_onAddHackathon);
   }
 
   void _onFetchHackathons(FetchHackathons event, Emitter<HackathonState> emit) async {
@@ -69,6 +70,46 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
       };
     } else {
       throw Exception('Failed to load hackathon');
+    }
+  }
+
+  void _onAddHackathon(AddHackathon event, Emitter<HackathonState> emit) async {
+    emit(HackathonLoading());
+    try {
+      print('Calling _addHackathon with data: ${event.hackathonData}');
+      final hackathon = await _addHackathon(event.token, event.hackathonData);
+      print('Hackathon added: $hackathon');
+      emit(HackathonAdded(hackathon));
+      add(FetchHackathons(event.token));
+    } catch (e) {
+      print('Error adding hackathon: $e');
+      emit(HackathonError(e.toString()));
+    }
+  }
+
+  Future<Map<String, dynamic>> _addHackathon(String token, Map<String, dynamic> hackathonData) async {
+    final url = Uri.parse('${Config.baseUrl}/hackathons/');
+    print('Sending POST request to $url with body: $hackathonData');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(hackathonData),
+    );
+
+    print('Response status: ${response.statusCode}');
+    print('Response headers: ${response.headers}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 400) {
+      throw Exception('Bad request');
+    } else {
+      throw Exception('Failed to add hackathon');
     }
   }
 }

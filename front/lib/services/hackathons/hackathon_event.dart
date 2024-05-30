@@ -26,3 +26,12 @@ class FetchSingleHackathons extends HackathonEvent {
   List<Object> get props => [token, id];
 }
 
+class AddHackathon extends HackathonEvent {
+  final String token;
+  final Map<String, dynamic> hackathonData;
+
+  const AddHackathon(this.token, this.hackathonData);
+
+  @override
+  List<Object> get props => [token, hackathonData];
+}

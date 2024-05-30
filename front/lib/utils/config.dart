@@ -13,6 +13,7 @@ import '../services/authentication_service.dart';
 import '../services/login/login_bloc.dart';
 import '../services/logout/logout_bloc.dart';
 import '../services/register/register_bloc.dart';
+import '../services/hackathons/hackathon_bloc.dart';
 
 class Config {
   static String baseUrl =
@@ -41,6 +42,9 @@ class Config {
     ),
     BlocProvider<RegistrationBloc>(
       create: (context) => RegistrationBloc(AuthenticationService()),
+    ),
+    BlocProvider<HackathonBloc>( // Ajout du HackathonBloc
+      create: (context) => HackathonBloc(),
     ),
   ];
 }

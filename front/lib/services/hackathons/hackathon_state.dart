@@ -28,3 +28,12 @@ class HackathonError extends HackathonState {
   @override
   List<Object> get props => [message];
 }
+
+class HackathonAdded extends HackathonState {
+  final Map<String, dynamic> hackathon;
+
+  const HackathonAdded(this.hackathon);
+
+  @override
+  List<Object> get props => [hackathon];
+}
