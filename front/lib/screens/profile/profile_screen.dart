@@ -33,12 +33,12 @@ class ProfileScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         CircleAvatar(
                           radius: 50,
                           backgroundImage: NetworkImage(state.user.profilePicture),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Text(
                           state.user.firstName,
                           style: Theme.of(context).textTheme.headlineSmall,
@@ -51,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
                           state.user.email,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
                             BlocProvider.of<AuthenticationBloc>(context).add(LogoutEvent());

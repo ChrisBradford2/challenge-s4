@@ -15,3 +15,14 @@ class FetchHackathons extends HackathonEvent {
   @override
   List<Object> get props => [token];
 }
+
+class FetchSingleHackathons extends HackathonEvent {
+  final String token;
+  final String id;
+
+  const FetchSingleHackathons(this.token, this.id);
+
+  @override
+  List<Object> get props => [token, id];
+}
+

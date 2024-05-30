@@ -32,7 +32,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     if (response.statusCode == 200) {
       return User.fromJson(jsonDecode(response.body));
     } else {
-      print("Error: ${response.body}");
       throw Exception('Failed to load user');
     }
   }

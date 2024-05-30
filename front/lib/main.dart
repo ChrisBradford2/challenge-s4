@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:front/screens/home_screen.dart';
 import 'package:front/screens/login/login_screen.dart';
+import 'package:front/screens/main_screen.dart';
 import 'package:front/screens/profile/profile_screen.dart';
 import 'package:front/services/logout/logout_bloc.dart';
 import 'package:front/services/logout/logout_state.dart';
@@ -122,7 +122,7 @@ class MyApp extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
-            return HomeScreen(token: snapshot.data!.uid);
+            return MainScreen(token: snapshot.data!.uid); // Utilise MainScreen avec le token
           } else {
             return const LoginPage();
           }
