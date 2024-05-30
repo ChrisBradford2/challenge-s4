@@ -18,7 +18,14 @@ class LoginPage extends StatelessWidget {
     TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
+      appBar: AppBar(
+          title:  Center(
+            child: Image.asset(
+              'assets/logo.png', // Remplacez par le chemin de votre logo
+              height: 100.0, // Vous pouvez ajuster la taille selon vos besoins
+            ),
+          ),
+      ),
       body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
@@ -34,19 +41,28 @@ class LoginPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
+              const SizedBox(height: 30),
+              const Text(
+                'Kiwi collective',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 80),
               TextField(
                 controller: emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
               TextField(
                 controller: passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Mot de passe'),
                 obscureText: true,
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
+              const SizedBox(height: 30),
+              /*ElevatedButton(
                 onPressed: () {
                   loginBloc.add(LoginButtonPressed(
                       email: emailController.text,
@@ -54,12 +70,18 @@ class LoginPage extends StatelessWidget {
                   ));
                 },
                 child: const Text('Login'),
+              ),*/
+              //SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/register');
+                },
+                child: const Text('S\'inscrire'),
               ),
-              SizedBox(height: 20),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: ButtonBase(
-                  text: 'Login',
+                  text: 'Se connecter',
                   onPressed: () {
                     loginBloc.add(LoginButtonPressed(
                       email: emailController.text,
@@ -67,12 +89,6 @@ class LoginPage extends StatelessWidget {
                     ));
                   },
                 ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/register');
-                },
-                child: const Text('Register'),
               ),
             ],
           ),

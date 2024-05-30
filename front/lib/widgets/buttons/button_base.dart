@@ -16,7 +16,7 @@ class ButtonBase extends StatelessWidget{
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.indigo, // Background color// Text color
+        backgroundColor: Color.fromRGBO(41, 92, 66, 1), // Background color// Text color
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0), // Border radius
         ),

@@ -6,6 +6,7 @@ import 'dart:io';
 import '../../services/register/register_bloc.dart';
 import '../../services/register/register_event.dart';
 import '../../services/register/register_state.dart';
+import '../../widgets/buttons/button_base.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -53,7 +54,15 @@ class RegisterScreenState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Inscription")),
+      appBar: AppBar(
+          title: Padding(
+            padding: const EdgeInsets.all(90.0),
+            child: Image.asset(
+              'assets/logo.png', // Remplacez par le chemin de votre logo
+              height: 100.0, // Vous pouvez ajuster la taille selon vos besoins
+            ),
+          ),
+      ),
       body: BlocListener<RegistrationBloc, RegistrationState>(
         listener: (context, state) {
           if (state is RegistrationSuccess) {
@@ -73,6 +82,26 @@ class RegisterScreenState extends State<RegisterPage> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
+                const SizedBox(height: 30),
+                const Text(
+                  'Bienvenue sur Kiwi Collective',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Center(
+                  child: Text(
+                    'Créer un compte pour pour commencer à participer à un hackathon',
+                    style: TextStyle(
+                      fontSize: 28.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 30),
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(labelText: 'Nom d\'utilisateur'),
@@ -124,14 +153,40 @@ class RegisterScreenState extends State<RegisterPage> {
                     return null;
                   },
                 ),
-                if (_profileImage != null) Image.file(_profileImage!),
-                ElevatedButton(
+                const SizedBox(height: 10),
+                if (_profileImage != null)
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: Image.file(_profileImage!, fit: BoxFit.cover),
+                  ),
+                Center(
+                  child: TextButton(
+                    onPressed: _pickImage,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min, // Pour que la ligne ne prenne que la largeur nécessaire
+                      children: [
+                        Icon(Icons.file_upload_outlined, color: Colors.green), // Icône à gauche du texte
+                        SizedBox(width: 8), // Espace entre l'icône et le texte
+                        Text(
+                          'Choisir une photo de profil',
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                /*ElevatedButton(
                   onPressed: _pickImage,
                   child: const Text('Choisir une image de profil'),
-                ),
-                ElevatedButton(
-                  onPressed: _onRegisterButtonPressed,
-                  child: const Text('S\'inscrire'),
+                ),*/
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: ButtonBase(
+                    text: 'S\'inscrire',
+                    onPressed: _onRegisterButtonPressed,
+                  ),
                 ),
               ],
             ),
