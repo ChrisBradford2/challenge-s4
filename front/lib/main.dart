@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:front/screens/main_screen.dart';
 import 'package:front/screens/login/login_screen.dart';
@@ -21,8 +22,8 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
   HttpOverrides.global = MyHttpOverrides();
+  await dotenv.load(fileName: ".env");
 
   try {
     if (!kIsWeb) {
