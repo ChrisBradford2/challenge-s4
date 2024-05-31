@@ -9,13 +9,13 @@ import 'hackathon/hackathon_detail_screen.dart';
 class HomeScreen extends StatefulWidget {
   final String token;
 
-  HomeScreen({super.key, required this.token});
+  const HomeScreen({super.key, required this.token});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();

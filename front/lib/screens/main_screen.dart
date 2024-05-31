@@ -9,13 +9,13 @@ import 'home_screen.dart';
 class MainScreen extends StatefulWidget {
   final String token;
 
-  MainScreen({required this.token});
+  const MainScreen({super.key, required this.token});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   late List<Widget> _widgetOptions;
 

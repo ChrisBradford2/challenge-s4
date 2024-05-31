@@ -21,8 +21,8 @@ class HackathonScreen extends StatelessWidget {
         onPressed: () {
           _showAddHackathonDialog(context, token);
         },
-        child: const Icon(Icons.add),
         tooltip: 'Ajouter un hackathon',
+        child: const Icon(Icons.add),
       ),
     );
   }

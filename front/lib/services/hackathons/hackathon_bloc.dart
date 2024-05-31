@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -76,20 +77,19 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
   void _onAddHackathon(AddHackathon event, Emitter<HackathonState> emit) async {
     emit(HackathonLoading());
     try {
-      print('Calling _addHackathon with data: ${event.hackathonData}');
       final hackathon = await _addHackathon(event.token, event.hackathonData);
-      print('Hackathon added: $hackathon');
       emit(HackathonAdded(hackathon));
       add(FetchHackathons(event.token));
     } catch (e) {
-      print('Error adding hackathon: $e');
+      if (kDebugMode) {
+        print('Error adding hackathon: $e');
+      }
       emit(HackathonError(e.toString()));
     }
   }
 
   Future<Map<String, dynamic>> _addHackathon(String token, Map<String, dynamic> hackathonData) async {
     final url = Uri.parse('${Config.baseUrl}/hackathons/');
-    print('Sending POST request to $url with body: $hackathonData');
 
     final response = await http.post(
       url,
@@ -100,9 +100,11 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
       body: jsonEncode(hackathonData),
     );
 
-    print('Response status: ${response.statusCode}');
-    print('Response headers: ${response.headers}');
-    print('Response body: ${response.body}');
+    if (kDebugMode) {
+      print('Response status: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response body: ${response.body}');
+    }
 
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
