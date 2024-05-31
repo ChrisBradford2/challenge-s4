@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"challenges4/config"
 	"challenges4/models"
 	"challenges4/services"
 	"fmt"
@@ -10,6 +9,18 @@ import (
 	"net/http"
 )
 
+// CreateHackathon godoc
+// @Summary Create a new Hackathon
+// @Description Create a new Hackathon
+// @Tags Hackathons
+// @Accept  json
+// @Produce  json
+// @Param hackathon body models.HackathonCreate true "Hackathon object"
+// @Security ApiKeyAuth
+// @Success 201 {object} models.Hackathon "Successfully created Hackathon"
+// @Failure 400 {object} string "Bad request"
+// @Failure 500 {object} string "Internal server error"
+// @Router /hackathons [post]
 func CreateHackathon(c *gin.Context, db *gorm.DB) {
 	var hackathon models.Hackathon
 
@@ -59,6 +70,14 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusCreated, gin.H{"data": hackathon})
 }
 
+// GetHackathons godoc
+// @Summary Get all Hackathons
+// @Description Get all Hackathons
+// @Tags Hackathons
+// @Produce  json
+// @Security ApiKeyAuth
+// @Success 200 {array} models.Hackathon
+// @Router /hackathons [get]
 func GetHackathons(c *gin.Context, db *gorm.DB) {
 	var hackathons []models.Hackathon
 
@@ -87,10 +106,12 @@ func GetHackathons(c *gin.Context, db *gorm.DB) {
 	isActive := c.Query("active")
 	query := db.Model(&models.Hackathon{})
 
-	if user.Roles != config.RoleAdmin {
-		query = query.Joins("JOIN participations ON hackathons.id = participations.hackathon_id").
-			Where("participations.user_id = ?", user.ID)
-	}
+	/*
+		if user.Roles != config.RoleAdmin {
+			query = query.Joins("JOIN participations ON hackathons.id = participations.hackathon_id").
+				Where("participations.user_id = ?", user.ID)
+		}
+	*/
 
 	if isActive != "" {
 		query = db.Where("is_active = ?", isActive)
@@ -209,6 +230,15 @@ func UpdateHackathon(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{"data": hackathon})
 }
 
+// DeleteHackathon godoc
+// @Summary Delete a Hackathon
+// @Description Delete a Hackathon
+// @Tags Hackathons
+// @Produce  json
+// @Param id path int true "Hackathon ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} bool "Successfully deleted Hackathon"
+// @Router /hackathons/{id} [delete]
 func DeleteHackathon(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
 	if err := db.Delete(&models.Hackathon{}, id).Error; err != nil {
@@ -219,6 +249,15 @@ func DeleteHackathon(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
 
+// HackathonRegister godoc
+// @Summary Register for a Hackathon
+// @Description Register for a Hackathon
+// @Tags Hackathons
+// @Produce  json
+// @Param id path int true "Hackathon ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} bool "Successfully registered for Hackathon"
+// @Router /hackathons/{id}/register [post]
 func HackathonRegister(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
 	var hackathon models.Hackathon

@@ -13,6 +13,8 @@ type StepController struct {
 	DB *gorm.DB
 }
 
+type JSONResponse map[string]interface{}
+
 func NewStepController(db *gorm.DB) *StepController {
 	return &StepController{DB: db}
 }
@@ -25,7 +27,7 @@ func NewStepController(db *gorm.DB) *StepController {
 // @Produce  json
 // @Param step body models.StepCreate true "Step object"
 // @Security ApiKeyAuth
-// @Success 201 {object} gin.H{message=string,data=models.Step} "Step created successfully"
+// @Success 201 {object} JSONResponse{message=string,data=models.Step} "Step created successfully"
 // @Failure 400 {object} string "Bad request"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 404 {object} string "User not found"
@@ -71,7 +73,7 @@ func (ctrl *StepController) CreateStep(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(http.StatusCreated, JSONResponse{
 		"message": "Step created successfully",
 		"data":    step,
 	})
@@ -86,7 +88,7 @@ func (ctrl *StepController) CreateStep(c *gin.Context) {
 // @Param id path int true "Step ID"
 // @Param step body models.StepUpdate true "Step object"
 // @Security ApiKeyAuth
-// @Success 200 {object} gin.H{message=string,data=models.Step} "Step updated successfully"
+// @Success 200 {object} JSONResponse{message=string,data=models.Step} "Step updated successfully"
 // @Failure 400 {object} string "Bad request"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 404 {object} string "Step not found"

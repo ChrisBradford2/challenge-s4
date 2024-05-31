@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,8 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:front/screens/home_screen.dart';
+import 'package:front/screens/main_screen.dart';
 import 'package:front/screens/login/login_screen.dart';
+import 'package:front/screens/profile/profile_screen.dart';
 import 'package:front/services/logout/logout_bloc.dart';
 import 'package:front/services/logout/logout_state.dart';
 import 'package:front/utils/config.dart';
@@ -19,6 +21,20 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  HttpOverrides.global = MyHttpOverrides();
+
+  try {
+    if (!kIsWeb) {
+      if (kDebugMode) {
+        print(Platform.operatingSystem);
+      }
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Platform not available: $e');
+    }
+  }
 
   // Splash persistance jusqu'à l'initialisation
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -47,6 +63,14 @@ Future<void> main() async {
   runApp(MyApp(theme: theme));
 }
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 class MyApp extends StatelessWidget {
   final ThemeData theme;
 
@@ -62,6 +86,15 @@ class MyApp extends StatelessWidget {
         localizationsDelegates: Config.localizationsDelegates,
         initialRoute: '/',
         routes: getApplicationRoutes(),
+        onGenerateRoute: (settings) {
+          if (settings.name == '/profile') {
+            final String token = settings.arguments as String;
+            return MaterialPageRoute(
+              builder: (context) => ProfileScreen(token: token),
+            );
+          }
+          return unknownRoute(settings);
+        },
         onUnknownRoute: unknownRoute,
         supportedLocales: const [
           Locale('en', ''),
@@ -89,7 +122,7 @@ class MyApp extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
-            return HomeScreen(token: snapshot.data!.uid);
+            return MainScreen(token: snapshot.data!.uid); // Utilise MainScreen avec le token
           } else {
             return const LoginPage();
           }

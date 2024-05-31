@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../services/login/login_bloc.dart';
 import '../../services/login/login_event.dart';
 import '../../services/login/login_state.dart';
-import '../home_screen.dart';
+import '../main_screen.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -22,9 +21,9 @@ class LoginPage extends StatelessWidget {
         listener: (context, state) {
           if (state is LoginSuccess) {
             Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                    builder: (context) => HomeScreen(token: state.token)
-                )
+              MaterialPageRoute(
+                builder: (context) => MainScreen(token: state.token),
+              ),
             );
           } else if (state is LoginFailure) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));

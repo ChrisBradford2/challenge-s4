@@ -1,30 +1,6 @@
 definitions:
-  date.Date:
-    properties:
-      day:
-        description: |-
-          Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
-          to specify a year by itself or a year and month where the day isn't
-          significant.
-        type: integer
-      month:
-        description: |-
-          Month of a year. Must be from 1 to 12, or 0 to specify a year without a
-          month and day.
-        type: integer
-      year:
-        description: |-
-          Year of the date. Must be from 1 to 9999, or 0 to specify a date without
-          a year.
-        type: integer
-    type: object
-  gorm.DeletedAt:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
+  controllers.JSONResponse:
+    additionalProperties: true
     type: object
   models.ErrorResponse:
     properties:
@@ -65,6 +41,8 @@ definitions:
     type: object
   models.Hackathon:
     properties:
+      address:
+        type: string
       created_by_id:
         type: integer
       createdAt:
@@ -85,8 +63,12 @@ definitions:
         type: integer
       is_active:
         type: boolean
+      latitude:
+        type: number
       location:
         type: string
+      longitude:
+        type: number
       max_participants:
         type: integer
       name:
@@ -108,13 +90,44 @@ definitions:
         type: string
     type: object
   models.HackathonCreate:
+    properties:
+      address:
+        example: Paris
+        type: string
+      description:
+        example: Un événement pour les développeurs
+        type: string
+      end_date:
+        example: "2021-01-02"
+        type: string
+      latitude:
+        example: 0
+        type: number
+      location:
+        example: Paris
+        type: string
+      longitude:
+        example: 0
+        type: number
+      max_participants:
+        example: 100
+        type: integer
+      name:
+        example: Hackathon de Paris
+        type: string
+      nb_of_teams:
+        example: 0
+        type: integer
+      start_date:
+        example: "2021-01-01"
+        type: string
     type: object
   models.Participation:
     properties:
       createdAt:
         type: string
       deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
+        type: string
       hackathonID:
         description: Foreign key referencing Hackathon.ID
         type: integer
@@ -142,40 +155,6 @@ definitions:
       profile_picture:
         type: string
     type: object
-  models.Registration:
-    properties:
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
-      id:
-        type: integer
-      is_valid:
-        example: false
-        type: boolean
-      team:
-        allOf:
-        - $ref: '#/definitions/models.Team'
-        description: Belongs to Team
-      teamID:
-        description: Foreign key referencing Team.ID
-        type: integer
-      updatedAt:
-        type: string
-      user:
-        allOf:
-        - $ref: '#/definitions/models.User'
-        description: Belongs to User
-      userID:
-        description: Foreign key referencing User.ID
-        type: integer
-    type: object
-  models.RegistrationUpdate:
-    properties:
-      is_valid:
-        example: true
-        type: boolean
-    type: object
   models.Skill:
     properties:
       createdAt:
@@ -196,6 +175,61 @@ definitions:
           $ref: '#/definitions/models.User'
         type: array
     type: object
+  models.Step:
+    properties:
+      createdAt:
+        type: string
+      dead_line_date:
+        example: "2025-12-31T23:59:59Z"
+        type: string
+      deletedAt:
+        type: string
+      hackathon:
+        $ref: '#/definitions/models.Hackathon'
+      hackathon_id:
+        example: 1
+        type: integer
+      id:
+        type: integer
+      position:
+        example: 1
+        type: integer
+      status:
+        example: done
+        type: string
+      title:
+        example: Step 1
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.StepCreate:
+    properties:
+      dead_line_date:
+        example: "2025-12-31T23:59:59Z"
+        type: string
+      hackathon_id:
+        example: 1
+        type: integer
+      position:
+        example: 1
+        type: integer
+      title:
+        example: Step 1
+        type: string
+    type: object
+  models.StepUpdate:
+    properties:
+      dead_line_date:
+        example: "2025-12-31T23:59:59Z"
+        type: string
+      status:
+        example: done
+        type: string
+      title:
+        example: Step 1
+        type: string
+    type: object
   models.Team:
     properties:
       createdAt:
@@ -211,11 +245,8 @@ definitions:
       name:
         example: Team 1
         type: string
-      registrations:
-        description: Has many Registrations
-        items:
-          $ref: '#/definitions/models.Registration'
-        type: array
+      nbOfMembers:
+        type: integer
       updatedAt:
         type: string
       users:
@@ -337,7 +368,7 @@ paths:
       - files
   /hackathons:
     get:
-      description: Récupère une liste de tous les hackathons
+      description: Get all Hackathons
       produces:
       - application/json
       responses:
@@ -349,15 +380,15 @@ paths:
             type: array
       security:
       - ApiKeyAuth: []
-      summary: Lire tous les hackathons
+      summary: Get all Hackathons
       tags:
-      - hackathons
+      - Hackathons
     post:
       consumes:
       - application/json
-      description: Ajoute un nouveau hackathon à la base de données
+      description: Create a new Hackathon
       parameters:
-      - description: Hackathon à créer
+      - description: Hackathon object
         in: body
         name: hackathon
         required: true
@@ -366,20 +397,28 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: Successfully created Hackathon
           schema:
             $ref: '#/definitions/models.Hackathon'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
       security:
       - ApiKeyAuth: []
-      summary: Créer un hackathon
+      summary: Create a new Hackathon
       tags:
-      - hackathons
+      - Hackathons
   /hackathons/{id}:
     delete:
-      description: Supprime un hackathon par son ID
+      description: Delete a Hackathon
       parameters:
-      - description: ID du Hackathon
+      - description: Hackathon ID
         in: path
         name: id
         required: true
@@ -388,67 +427,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: true si la suppression est réussie
+          description: Successfully deleted Hackathon
           schema:
             type: boolean
       security:
       - ApiKeyAuth: []
-      summary: Supprimer un hackathon
+      summary: Delete a Hackathon
       tags:
-      - hackathons
-    get:
-      description: Récupère un hackathon par son ID
-      parameters:
-      - description: ID du Hackathon
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Hackathon'
-      security:
-      - ApiKeyAuth: []
-      summary: Lire un hackathon spécifique
-      tags:
-      - hackathons
-    put:
-      consumes:
-      - application/json
-      description: Met à jour les informations d'un hackathon par son ID
-      parameters:
-      - description: ID du Hackathon
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Informations du Hackathon à mettre à jour
-        in: body
-        name: hackathon
-        required: true
-        schema:
-          $ref: '#/definitions/models.Hackathon'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Hackathon'
-      security:
-      - ApiKeyAuth: []
-      summary: Mettre à jour un hackathon
-      tags:
-      - hackathons
+      - Hackathons
   /hackathons/{id}/register:
     post:
-      description: Enregistre un utilisateur à un hackathon par son ID
+      description: Register for a Hackathon
       parameters:
-      - description: ID du Hackathon
+      - description: Hackathon ID
         in: path
         name: id
         required: true
@@ -457,14 +448,14 @@ paths:
       - application/json
       responses:
         "200":
-          description: Inscription réussie
+          description: Successfully registered for Hackathon
           schema:
             type: boolean
       security:
       - ApiKeyAuth: []
-      summary: Enregistrer un utilisateur à un hackathon
+      summary: Register for a Hackathon
       tags:
-      - hackathons
+      - Hackathons
   /hackathons/{id}/teammate/search:
     post:
       description: Recherche un coéquipier pour un hackathon
@@ -482,119 +473,32 @@ paths:
       summary: Rechercher un coéquipier
       tags:
       - hackathons
-  /registrations:
-    get:
-      description: Retrieves registrations from the database with optional filtering
-        based on teamid, user, and status
-      parameters:
-      - description: Filter by team ID
-        in: query
-        name: teamid
-        type: integer
-      - description: Filter by user
-        in: query
-        name: user
-        type: string
-      - description: Filter by status
-        in: query
-        name: status
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Registration'
-            type: array
-      security:
-      - ApiKeyAuth: []
-      summary: Get registrations with optional filters
-      tags:
-      - registrations
+  /steps:
     post:
       consumes:
       - application/json
-      description: Create a new registration
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved registration
-          schema:
-            $ref: '#/definitions/models.Registration'
-        "400":
-          description: Bad request
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Create a new registration
-      tags:
-      - registrations
-  /registrations/{id}:
-    delete:
-      description: Deletes a registration from the database
+      description: Create a new step for a hackathon
       parameters:
-      - description: Registration ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses: {}
-      security:
-      - ApiKeyAuth: []
-      summary: Delete a registration
-      tags:
-      - registrations
-    get:
-      description: Retrieves a specific registration from the database
-      parameters:
-      - description: Registration ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Registration'
-      security:
-      - ApiKeyAuth: []
-      summary: Get a registration
-      tags:
-      - registrations
-    patch:
-      consumes:
-      - application/json
-      description: Update a registration by ID
-      parameters:
-      - description: Registration ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Registration update object
+      - description: Step object
         in: body
-        name: registration
+        name: step
         required: true
         schema:
-          $ref: '#/definitions/models.RegistrationUpdate'
+          $ref: '#/definitions/models.StepCreate'
       produces:
       - application/json
       responses:
-        "200":
-          description: Successfully updated registration
+        "201":
+          description: Step created successfully
           schema:
-            $ref: '#/definitions/models.Registration'
+            allOf:
+            - $ref: '#/definitions/controllers.JSONResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Step'
+                message:
+                  type: string
+              type: object
         "400":
           description: Bad request
           schema:
@@ -604,7 +508,7 @@ paths:
           schema:
             type: string
         "404":
-          description: Registration not found
+          description: User not found
           schema:
             type: string
         "500":
@@ -613,9 +517,61 @@ paths:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: Update a registration
+      summary: Create a new step
       tags:
-      - registrations
+      - steps
+  /steps/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update a step by ID
+      parameters:
+      - description: Step ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Step object
+        in: body
+        name: step
+        required: true
+        schema:
+          $ref: '#/definitions/models.StepUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Step updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.JSONResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Step'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Step not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update a step
+      tags:
+      - steps
   /teams:
     get:
       description: Get all teams
@@ -754,6 +710,80 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a team
+      tags:
+      - teams
+  /teams/{id}/leave:
+    post:
+      description: Leave a team by ID
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully left team
+          schema:
+            type: string
+        "400":
+          description: User is not in the target team
+          schema:
+            type: string
+        "401":
+          description: 'Unauthorized: No authorization token provided or invalid token'
+          schema:
+            type: string
+        "404":
+          description: Team not found or User not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Leave a team
+      tags:
+      - teams
+  /teams/{id}/register:
+    post:
+      description: Register to a team by ID
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully registered to team
+          schema:
+            $ref: '#/definitions/models.Team'
+        "400":
+          description: User is already in a team or Team is already full
+          schema:
+            type: string
+        "401":
+          description: 'Unauthorized: No authorization token provided or invalid token'
+          schema:
+            type: string
+        "404":
+          description: Team not found or User not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Register to a team
       tags:
       - teams
   /upload:
