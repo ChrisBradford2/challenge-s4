@@ -34,6 +34,9 @@ class HackathonDetailPage extends StatelessWidget {
                     Text('Date: ${hackathon["date"]}', style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 16),
                     Text('Location: ${hackathon["location"]}', style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 16),
+                    Text('Description: ${hackathon["description"]}', style: const TextStyle(fontSize: 18)),
+                    // Add more fields as necessary
                   ],
                 ),
               );

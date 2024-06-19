@@ -21,6 +21,12 @@ func GetHackathonsHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+func GetHackathonHandler(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		controllers.GetHackathon(c, db)
+	}
+}
+
 func GetHackathonsByUserHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		controllers.GetHackathonsByUser(c, db)
@@ -71,6 +77,7 @@ func HackathonRoutes(r *gin.Engine, db *gorm.DB) {
 	{
 		hackathonGroup.POST("/", middleware.AuthMiddleware(config.RoleUser), CreateHackathonHandler(db))
 		hackathonGroup.GET("/", middleware.AuthMiddleware(config.RoleUser), GetHackathonsHandler(db))
+		hackathonGroup.GET("/:id", middleware.AuthMiddleware(config.RoleUser), GetHackathonHandler(db))
 		hackathonGroup.GET("/user", middleware.AuthMiddleware(config.RoleUser), GetHackathonsByUserHandler(db))
 		hackathonGroup.PUT("/:id", middleware.AuthMiddleware(config.RoleOrganizer), UpdateHackathonHandler(db))
 		hackathonGroup.DELETE("/:id", middleware.AuthMiddleware(config.RoleOrganizer), DeleteHackathonHandler(db))

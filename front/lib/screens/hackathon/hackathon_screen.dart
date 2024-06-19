@@ -5,6 +5,7 @@ import '../../components/forms/add_hackathon_form.dart';
 import '../../services/hackathons/hackathon_bloc.dart';
 import '../../services/hackathons/hackathon_event.dart';
 import '../../services/hackathons/hackathon_state.dart';
+import 'hackathon_detail_screen.dart';
 
 class HackathonScreen extends StatelessWidget {
   final String token;
@@ -50,6 +51,14 @@ class HackathonScreen extends StatelessWidget {
                   return ListTile(
                     title: Text(hackathon['name'] ?? 'Unknown'),
                     subtitle: Text('${hackathon['date'] ?? 'Unknown'} - ${hackathon['location'] ?? 'Unknown'}'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HackathonDetailPage(id: hackathon['id'] ?? '', token: token),
+                        ),
+                      );
+                    },
                   );
                 },
               );

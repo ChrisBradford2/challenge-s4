@@ -114,7 +114,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Successfully created Hackathon",
                         "schema": {
                             "$ref": "#/definitions/models.Hackathon"
@@ -122,6 +122,61 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/hackathons/user": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get hackathons created by the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hackathons"
+                ],
+                "summary": "Get hackathons created by the user",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list of hackathons",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Hackathon"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
@@ -136,6 +191,106 @@ const docTemplate = `{
             }
         },
         "/hackathons/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a Hackathon",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hackathons"
+                ],
+                "summary": "Get a Hackathon",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Hackathon ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved Hackathon",
+                        "schema": {
+                            "$ref": "#/definitions/models.Hackathon"
+                        }
+                    },
+                    "404": {
+                        "description": "Hackathon not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update a Hackathon",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hackathons"
+                ],
+                "summary": "Update a Hackathon",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Hackathon ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Hackathon object",
+                        "name": "hackathon",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HackathonCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated Hackathon",
+                        "schema": {
+                            "$ref": "#/definitions/models.Hackathon"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Hackathon not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -1273,6 +1428,9 @@ const docTemplate = `{
                 "isOrganizer": {
                     "description": "Indicates if the user is an organizer of the hackathon",
                     "type": "boolean"
+                },
+                "team_id": {
+                    "type": "integer"
                 },
                 "updatedAt": {
                     "type": "string"

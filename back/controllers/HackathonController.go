@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"challenges4/config"
+	middlewares "challenges4/middlewares"
 	"challenges4/models"
 	"challenges4/services"
 	"fmt"
@@ -54,7 +55,6 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	// Associer l'ID de l'utilisateur créateur au hackathon
 	hackathon.CreatedByID = &userID
 
 	if result := db.Create(&hackathon); result.Error != nil {
@@ -79,6 +79,12 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": updateRoleResult.Error.Error()})
 			return
 		}
+	}
+
+	// Automatically create teams
+	if err := middlewares.CreateTeamsForHackathon(db, &hackathon); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"data": hackathon})
@@ -208,6 +214,42 @@ func GetHackathonsByUser(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{"data": hackathons})
 }
 
+// GetHackathon godoc
+// @Summary Get a single Hackathon
+// @Description Get a single Hackathon
+// @Tags Hackathons
+// @Produce  json
+// @Param id path int true "Hackathon ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Hackathon "Successfully retrieved Hackathon"
+// @Failure 404 {object} string "Hackathon not found"
+// @Router /hackathons/{id} [get]
+func GetHackathon(c *gin.Context, db *gorm.DB) {
+	// Get single hackathon
+	id := c.Param("id")
+	var hackathon models.Hackathon
+	if err := db.First(&hackathon, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": hackathon})
+}
+
+// UpdateHackathon godoc
+// @Summary Update a Hackathon
+// @Description Update a Hackathon
+// @Tags Hackathons
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Hackathon ID"
+// @Param hackathon body models.HackathonCreate true "Hackathon object"
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Hackathon "Successfully updated Hackathon"
+// @Failure 400 {object} string "Bad request"
+// @Failure 404 {object} string "Hackathon not found"
+// @Failure 500 {object} string "Internal server error"
+// @Router /hackathons/{id} [put]
 func UpdateHackathon(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
 	var hackathon models.Hackathon

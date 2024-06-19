@@ -42,6 +42,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
         };
       }).toList();
     } else {
+      print(response.body);
       throw Exception('Failed to load hackathons');
     }
   }
@@ -49,8 +50,8 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
   void _onFetchSingleHackathons(FetchSingleHackathons event, Emitter<HackathonState> emit) async {
     emit(HackathonLoading());
     try {
-      final hackathons = await _fetchSingleHackathon(event.token, event.id);
-      emit(HackathonLoaded([hackathons]));
+      final hackathon = await _fetchSingleHackathon(event.token, event.id);
+      emit(HackathonLoaded([hackathon]));
     } catch (e) {
       emit(HackathonError(e.toString()));
     }
@@ -65,11 +66,14 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
     if (response.statusCode == 200) {
       dynamic data = jsonDecode(response.body)['data'];
       return {
+        "id": data["id"].toString(),
         "name": data["name"].toString(),
         "date": data["start_date"].toString(),
         "location": data["location"].toString(),
+        "description": data["description"].toString(),
       };
     } else {
+      print(response.body);
       throw Exception('Failed to load hackathon');
     }
   }
@@ -86,7 +90,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
 
   Future<List<Map<String, String>>> _fetchHackathonForUser(String token) async {
     final response = await http.get(
-      Uri.parse('${Config.baseUrl}/hackathons/user'), // Update the URL to point to the user-specific endpoint
+      Uri.parse('${Config.baseUrl}/hackathons/user'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -101,6 +105,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
         };
       }).toList();
     } else {
+      print(response.body);
       throw Exception('Failed to load hackathons');
     }
   }
@@ -138,7 +143,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
     }
 
     if (response.statusCode == 201) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.body)['data'];
     } else if (response.statusCode == 400) {
       throw Exception('Bad request');
     } else {
