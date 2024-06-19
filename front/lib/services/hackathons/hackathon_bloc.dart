@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'dart:convert';
+import '../../models/hackathon_model.dart';
 import '../../utils/config.dart';
 import 'hackathon_event.dart';
 import 'hackathon_state.dart';
@@ -25,7 +25,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
     }
   }
 
-  Future<List<Map<String, String>>> _fetchHackathons(String token) async {
+  Future<List<Hackathon>> _fetchHackathons(String token) async {
     final response = await http.get(
       Uri.parse('${Config.baseUrl}/hackathons'),
       headers: {'Authorization': 'Bearer $token'},
@@ -33,16 +33,8 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body)['data'];
-      return data.map((item) {
-        return {
-          "id": item["id"]?.toString() ?? '',
-          "name": item["name"]?.toString() ?? 'Unknown',
-          "date": item["start_date"]?.toString() ?? 'Unknown',
-          "location": item["location"]?.toString() ?? 'Unknown',
-        };
-      }).toList();
+      return data.map((item) => Hackathon.fromJson(item)).toList();
     } else {
-      print(response.body);
       throw Exception('Failed to load hackathons');
     }
   }
@@ -57,7 +49,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
     }
   }
 
-  Future<Map<String, String>> _fetchSingleHackathon(String token, String id) async {
+  Future<Hackathon> _fetchSingleHackathon(String token, String id) async {
     final response = await http.get(
       Uri.parse('${Config.baseUrl}/hackathons/$id'),
       headers: {'Authorization': 'Bearer $token'},
@@ -65,15 +57,8 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
 
     if (response.statusCode == 200) {
       dynamic data = jsonDecode(response.body)['data'];
-      return {
-        "id": data["id"].toString(),
-        "name": data["name"].toString(),
-        "date": data["start_date"].toString(),
-        "location": data["location"].toString(),
-        "description": data["description"].toString(),
-      };
+      return Hackathon.fromJson(data);
     } else {
-      print(response.body);
       throw Exception('Failed to load hackathon');
     }
   }
@@ -88,7 +73,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
     }
   }
 
-  Future<List<Map<String, String>>> _fetchHackathonForUser(String token) async {
+  Future<List<Hackathon>> _fetchHackathonForUser(String token) async {
     final response = await http.get(
       Uri.parse('${Config.baseUrl}/hackathons/user'),
       headers: {'Authorization': 'Bearer $token'},
@@ -96,16 +81,8 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body)['data'];
-      return data.map((item) {
-        return {
-          "id": item["id"]?.toString() ?? '',
-          "name": item["name"]?.toString() ?? 'Unknown',
-          "date": item["start_date"]?.toString() ?? 'Unknown',
-          "location": item["location"]?.toString() ?? 'Unknown',
-        };
-      }).toList();
+      return data.map((item) => Hackathon.fromJson(item)).toList();
     } else {
-      print(response.body);
       throw Exception('Failed to load hackathons');
     }
   }
@@ -124,7 +101,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
     }
   }
 
-  Future<Map<String, dynamic>> _addHackathon(String token, Map<String, dynamic> hackathonData) async {
+  Future<Hackathon> _addHackathon(String token, Map<String, dynamic> hackathonData) async {
     final url = Uri.parse('${Config.baseUrl}/hackathons/');
 
     final response = await http.post(
@@ -143,7 +120,7 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
     }
 
     if (response.statusCode == 201) {
-      return jsonDecode(response.body)['data'];
+      return Hackathon.fromJson(jsonDecode(response.body)['data']);
     } else if (response.statusCode == 400) {
       throw Exception('Bad request');
     } else {

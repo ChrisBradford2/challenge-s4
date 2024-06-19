@@ -7,24 +7,18 @@ import (
 )
 
 func CreateTeamsForHackathon(db *gorm.DB, hackathon *models.Hackathon) error {
-	if hackathon.NbOfTeams <= 0 || hackathon.MaxParticipants <= 0 {
+	if hackathon.MaxParticipants <= 0 || hackathon.MaxParticipantsPerTeam <= 0 {
 		return nil
 	}
 
-	teamSize := hackathon.MaxParticipants / hackathon.NbOfTeams
-	for i := 0; i < hackathon.NbOfTeams; i++ {
-		teamName := fmt.Sprintf("Team %d (Hackathon %d)", i+1, hackathon.ID)
+	// Calculate the number of teams needed
+	nbOfTeams := (hackathon.MaxParticipants + hackathon.MaxParticipantsPerTeam - 1) / hackathon.MaxParticipantsPerTeam
+	hackathon.NbOfTeams = nbOfTeams
 
-		// Check if the team name already exists
-		var existingTeam models.Team
-		for db.Where("name = ?", teamName).First(&existingTeam).RowsAffected > 0 {
-			teamName = fmt.Sprintf("Team %d (Hackathon %d) - %d", i+1, hackathon.ID, i)
-		}
-
+	for i := 0; i < nbOfTeams; i++ {
 		team := models.Team{
-			Name:        teamName,
+			Name:        fmt.Sprintf("Team %d (Hackathon %d)", i+1, hackathon.ID),
 			HackathonID: &hackathon.ID,
-			NbOfMembers: teamSize,
 		}
 		if result := db.Create(&team); result.Error != nil {
 			return result.Error

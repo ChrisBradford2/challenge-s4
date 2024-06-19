@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"challenges4/config"
-	middlewares "challenges4/middlewares"
 	"challenges4/models"
 	"challenges4/services"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -26,9 +26,9 @@ import (
 // @Failure 500 {object} string "Internal server error"
 // @Router /hackathons [post]
 func CreateHackathon(c *gin.Context, db *gorm.DB) {
-	var hackathon models.Hackathon
+	var hackathonCreate models.HackathonCreate
 
-	if err := c.ShouldBindJSON(&hackathon); err != nil {
+	if err := c.ShouldBindJSON(&hackathonCreate); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -55,7 +55,17 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	hackathon.CreatedByID = &userID
+	hackathon := models.Hackathon{
+		Name:                   hackathonCreate.Name,
+		Description:            hackathonCreate.Description,
+		Address:                hackathonCreate.Address,
+		Location:               hackathonCreate.Location,
+		MaxParticipants:        hackathonCreate.MaxParticipants,
+		MaxParticipantsPerTeam: hackathonCreate.MaxParticipantsPerTeam,
+		StartDate:              hackathonCreate.StartDate,
+		EndDate:                hackathonCreate.EndDate,
+		CreatedByID:            &userID,
+	}
 
 	if result := db.Create(&hackathon); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
@@ -79,12 +89,6 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": updateRoleResult.Error.Error()})
 			return
 		}
-	}
-
-	// Automatically create teams
-	if err := middlewares.CreateTeamsForHackathon(db, &hackathon); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"data": hackathon})
@@ -225,11 +229,15 @@ func GetHackathonsByUser(c *gin.Context, db *gorm.DB) {
 // @Failure 404 {object} string "Hackathon not found"
 // @Router /hackathons/{id} [get]
 func GetHackathon(c *gin.Context, db *gorm.DB) {
-	// Get single hackathon
-	id := c.Param("id")
+	hackathonID := c.Param("id")
 	var hackathon models.Hackathon
-	if err := db.First(&hackathon, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+
+	if err := db.Preload("Teams").First(&hackathon, hackathonID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 

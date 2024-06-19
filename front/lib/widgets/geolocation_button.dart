@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_webservice/geocoding.dart';
@@ -13,24 +14,22 @@ class GeoLocationButton extends StatefulWidget {
   final Function(bool) onLoadingStateChanged;
 
   const GeoLocationButton({
-    Key? key,
+    super.key,
     required this.token,
     required this.onLocationSortedHackathons,
     required this.onLoadingStateChanged,
-  }) : super(key: key);
+  });
 
   @override
-  _GeoLocationButtonState createState() => _GeoLocationButtonState();
+  GeoLocationButtonState createState() => GeoLocationButtonState();
 }
 
-class _GeoLocationButtonState extends State<GeoLocationButton> {
+class GeoLocationButtonState extends State<GeoLocationButton> {
   Position? _currentPosition;
-  bool _errorOccurred = false;
 
   Future<void> _getCurrentLocation() async {
     widget.onLoadingStateChanged(true);
     setState(() {
-      _errorOccurred = false;
     });
 
     try {
@@ -41,12 +40,13 @@ class _GeoLocationButtonState extends State<GeoLocationButton> {
       });
       await _sortHackathonsByDistance();
     } catch (e) {
-      print('Error getting location: $e');
+      if (kDebugMode) {
+        print('Error getting location: $e');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de l\'obtention de la localisation')),
+        const SnackBar(content: Text('Erreur lors de l\'obtention de la localisation')),
       );
       setState(() {
-        _errorOccurred = true;
       });
     } finally {
       widget.onLoadingStateChanged(false);
@@ -64,9 +64,9 @@ class _GeoLocationButtonState extends State<GeoLocationButton> {
       List<dynamic> hackathonsWithDistance = [];
 
       for (var hackathon in hackathons) {
-        final location = hackathon['location'];
+        final location = hackathon.location;
         try {
-          final response = await geocoding.searchByAddress(location!);
+          final response = await geocoding.searchByAddress(location);
           if (response.isOkay && response.results.isNotEmpty) {
             final hackathonLocation = response.results.first.geometry.location;
             final distanceInMeters = Geolocator.distanceBetween(
@@ -77,26 +77,45 @@ class _GeoLocationButtonState extends State<GeoLocationButton> {
             );
             final distanceInKm = distanceInMeters / 1000;
             hackathonsWithDistance.add({
-              ...hackathon,
+              'id': hackathon.id,
+              'name': hackathon.name,
+              'description': hackathon.description,
+              'location': hackathon.location,
+              'date': hackathon.date,
+              'teams': hackathon.teams,
               'distance': distanceInKm,
             });
           } else {
-            print('Error fetching geocoding data: ${response.errorMessage}');
+            if (kDebugMode) {
+              print('Error fetching geocoding data: ${response.errorMessage}');
+            }
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erreur lors de la récupération des coordonnées pour l\'adresse : ${hackathon['location']}')),
+              SnackBar(content: Text('Erreur lors de la récupération des coordonnées pour l\'adresse : ${hackathon.location}')),
             );
             hackathonsWithDistance.add({
-              ...hackathon,
+              'id': hackathon.id,
+              'name': hackathon.name,
+              'description': hackathon.description,
+              'location': hackathon.location,
+              'date': hackathon.date,
+              'teams': hackathon.teams,
               'distance': '?',
             });
           }
         } catch (e) {
-          print('Exception during geocoding: $e');
+          if (kDebugMode) {
+            print('Exception during geocoding: $e');
+          }
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Exception lors de la géocodage pour l\'adresse : ${hackathon['location']}')),
+            SnackBar(content: Text('Exception lors de la géocodage pour l\'adresse : ${hackathon.location}')),
           );
           hackathonsWithDistance.add({
-            ...hackathon,
+            'id': hackathon.id,
+            'name': hackathon.name,
+            'description': hackathon.description,
+            'location': hackathon.location,
+            'date': hackathon.date,
+            'teams': hackathon.teams,
             'distance': '?',
           });
         }

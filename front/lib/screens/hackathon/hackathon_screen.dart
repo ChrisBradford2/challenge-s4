@@ -49,13 +49,13 @@ class HackathonScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final hackathon = state.hackathons[index];
                   return ListTile(
-                    title: Text(hackathon['name'] ?? 'Unknown'),
-                    subtitle: Text('${hackathon['date'] ?? 'Unknown'} - ${hackathon['location'] ?? 'Unknown'}'),
+                    title: Text(hackathon.name),
+                    subtitle: Text('${hackathon.date} - ${hackathon.location}'),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HackathonDetailPage(id: hackathon['id'] ?? '', token: token),
+                          builder: (context) => HackathonDetailPage(id: hackathon.id as String, token: token),
                         ),
                       );
                     },

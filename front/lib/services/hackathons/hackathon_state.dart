@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../models/hackathon_model.dart';
 
 abstract class HackathonState extends Equatable {
   const HackathonState();
@@ -12,7 +13,7 @@ class HackathonInitial extends HackathonState {}
 class HackathonLoading extends HackathonState {}
 
 class HackathonLoaded extends HackathonState {
-  final List<Map<String, String>> hackathons;
+  final List<Hackathon> hackathons;
 
   const HackathonLoaded(this.hackathons);
 
@@ -30,7 +31,7 @@ class HackathonError extends HackathonState {
 }
 
 class HackathonAdded extends HackathonState {
-  final Map<String, dynamic> hackathon;
+  final Hackathon hackathon;
 
   const HackathonAdded(this.hackathon);
 

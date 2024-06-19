@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/hackathons/hackathon_bloc.dart';
 import '../../services/hackathons/hackathon_event.dart';
 import '../../services/hackathons/hackathon_state.dart';
+import '../team/join_team_screen.dart';
 
 class HackathonDetailPage extends StatelessWidget {
   final String id;
@@ -29,14 +30,39 @@ class HackathonDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Name: ${hackathon["name"]}', style: const TextStyle(fontSize: 24)),
+                    Text('Name: ${hackathon.name}', style: const TextStyle(fontSize: 24)),
                     const SizedBox(height: 16),
-                    Text('Date: ${hackathon["date"]}', style: const TextStyle(fontSize: 18)),
+                    Text('Date: ${hackathon.date}', style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 16),
-                    Text('Location: ${hackathon["location"]}', style: const TextStyle(fontSize: 18)),
+                    Text('Location: ${hackathon.location}', style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 16),
-                    Text('Description: ${hackathon["description"]}', style: const TextStyle(fontSize: 18)),
-                    // Add more fields as necessary
+                    Text('Description: ${hackathon.description}', style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 16),
+                    const Text('Teams:', style: TextStyle(fontSize: 18)),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: hackathon.teams.length,
+                      itemBuilder: (context, index) {
+                        final team = hackathon.teams[index];
+                        return ListTile(
+                          title: Text(team.name),
+                          trailing: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => JoinTeamPage(
+                                    teamId: team.id.toString(), // Ensure this is a String
+                                    token: token,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Text('Join'),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               );

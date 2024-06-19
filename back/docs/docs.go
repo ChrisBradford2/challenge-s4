@@ -197,14 +197,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a Hackathon",
+                "description": "Get a single Hackathon",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Hackathons"
                 ],
-                "summary": "Get a Hackathon",
+                "summary": "Get a single Hackathon",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1325,16 +1325,13 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean"
                 },
-                "latitude": {
-                    "type": "number"
-                },
                 "location": {
                     "type": "string"
                 },
-                "longitude": {
-                    "type": "number"
-                },
                 "max_participants": {
+                    "type": "integer"
+                },
+                "max_participants_per_team": {
                     "type": "integer"
                 },
                 "name": {
@@ -1379,29 +1376,20 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2021-01-02"
                 },
-                "latitude": {
-                    "type": "number",
-                    "example": 0
-                },
                 "location": {
                     "type": "string",
                     "example": "Paris"
-                },
-                "longitude": {
-                    "type": "number",
-                    "example": 0
                 },
                 "max_participants": {
                     "type": "integer",
                     "example": 100
                 },
+                "max_participants_per_team": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string",
                     "example": "Hackathon de Paris"
-                },
-                "nb_of_teams": {
-                    "type": "integer",
-                    "example": 0
                 },
                 "start_date": {
                     "type": "string",

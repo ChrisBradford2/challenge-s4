@@ -63,13 +63,11 @@ definitions:
         type: integer
       is_active:
         type: boolean
-      latitude:
-        type: number
       location:
         type: string
-      longitude:
-        type: number
       max_participants:
+        type: integer
+      max_participants_per_team:
         type: integer
       name:
         type: string
@@ -100,24 +98,17 @@ definitions:
       end_date:
         example: "2021-01-02"
         type: string
-      latitude:
-        example: 0
-        type: number
       location:
         example: Paris
         type: string
-      longitude:
-        example: 0
-        type: number
       max_participants:
         example: 100
+        type: integer
+      max_participants_per_team:
         type: integer
       name:
         example: Hackathon de Paris
         type: string
-      nb_of_teams:
-        example: 0
-        type: integer
       start_date:
         example: "2021-01-01"
         type: string
@@ -446,7 +437,7 @@ paths:
       tags:
       - Hackathons
     get:
-      description: Get a Hackathon
+      description: Get a single Hackathon
       parameters:
       - description: Hackathon ID
         in: path
@@ -466,7 +457,7 @@ paths:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: Get a Hackathon
+      summary: Get a single Hackathon
       tags:
       - Hackathons
     put:

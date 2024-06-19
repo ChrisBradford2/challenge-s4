@@ -22,7 +22,7 @@ class AddHackathonForm extends StatelessWidget {
     final TextEditingController endDateTimeController = TextEditingController();
     final TextEditingController locationController = TextEditingController();
     final TextEditingController maxParticipantsController = TextEditingController();
-    final TextEditingController nbOfTeamsController = TextEditingController();
+    final TextEditingController maxParticipantsPerTeamController = TextEditingController();
 
     return SingleChildScrollView(
       child: Column(
@@ -112,14 +112,14 @@ class AddHackathonForm extends StatelessWidget {
           TextField(
             controller: maxParticipantsController,
             decoration: const InputDecoration(
-              labelText: 'Nombre maximum de participants',
+              labelText: 'Participants maximum',
             ),
             keyboardType: TextInputType.number,
           ),
           TextField(
-            controller: nbOfTeamsController,
+            controller: maxParticipantsPerTeamController,
             decoration: const InputDecoration(
-              labelText: 'Nombre d\'équipes',
+              labelText: 'Participants maximum / équipe',
             ),
             keyboardType: TextInputType.number,
           ),
@@ -143,7 +143,7 @@ class AddHackathonForm extends StatelessWidget {
                     'longitude': 0, // You need to fetch longitude from details
                     'max_participants': int.tryParse(maxParticipantsController.text) ?? 0,
                     'name': nameController.text,
-                    'nb_of_teams': int.tryParse(nbOfTeamsController.text) ?? 0,
+                    'max_participants_per_team': int.tryParse(maxParticipantsPerTeamController.text) ?? 0,
                     'start_date': startDateTimeController.text,
                   };
 

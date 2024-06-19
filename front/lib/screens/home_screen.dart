@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/hackathons/hackathon_bloc.dart';
 import '../../services/hackathons/hackathon_event.dart';
 import '../../services/hackathons/hackathon_state.dart';
+import '../models/hackathon_model.dart';
 import '../widgets/geolocation_button.dart';
 import 'hackathon/hackathon_detail_screen.dart';
 
@@ -17,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  List<dynamic> _sortedHackathons = [];
+  List<Hackathon> _sortedHackathons = [];
   bool _isLoading = false;
   final bool _errorOccurred = false;
 
@@ -28,7 +29,7 @@ class HomeScreenState extends State<HomeScreen> {
     context.read<HackathonBloc>().add(FetchHackathons(widget.token));
   }
 
-  void _handleLocationSortedHackathons(List<dynamic> sortedHackathons) {
+  void _handleLocationSortedHackathons(List<Hackathon> sortedHackathons) {
     setState(() {
       _sortedHackathons = sortedHackathons;
     });
@@ -48,7 +49,7 @@ class HomeScreenState extends State<HomeScreen> {
         actions: [
           GeoLocationButton(
             token: widget.token,
-            onLocationSortedHackathons: _handleLocationSortedHackathons,
+            onLocationSortedHackathons: (List<dynamic> hackathons) => _handleLocationSortedHackathons(hackathons.cast<Hackathon>()),
             onLoadingStateChanged: _handleLoadingStateChanged,
           ),
         ],
@@ -79,21 +80,19 @@ class HomeScreenState extends State<HomeScreen> {
                   itemCount: hackathons.length,
                   itemBuilder: (context, index) {
                     final hackathon = hackathons[index];
-                    final id = hackathon['id']!;
-                    final distance = hackathon['distance'] != null &&
-                        hackathon['distance'] != '?'
-                        ? '(${hackathon['distance'].toStringAsFixed(1)} km)'
+                    final distance = hackathon.distance != null
+                        ? '(${hackathon.distance!.toStringAsFixed(1)} km)'
                         : '(?)';
 
                     return ListTile(
                       leading: const Icon(Icons.event),
-                      title: Text(hackathon['name']!),
+                      title: Text(hackathon.name),
                       subtitle: Row(
                         children: [
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '${hackathon['date']} - ${hackathon['location']} $distance',
+                              '${hackathon.date} - ${hackathon.location} $distance',
                               overflow: TextOverflow.visible,
                             ),
                           ),
@@ -104,7 +103,7 @@ class HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => HackathonDetailPage(
-                              id: id,
+                              id: hackathon.id.toString(), // Convert int to String
                               token: widget.token,
                             ),
                           ),
