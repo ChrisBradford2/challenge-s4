@@ -7,12 +7,12 @@ import '../../utils/config.dart';
 import 'hackathon_event.dart';
 import 'hackathon_state.dart';
 
-// BLoC
 class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
   HackathonBloc() : super(HackathonInitial()) {
     on<FetchHackathons>(_onFetchHackathons);
     on<FetchSingleHackathons>(_onFetchSingleHackathons);
     on<AddHackathon>(_onAddHackathon);
+    on<FetchHackathonForUser>(_onFetchHackathonForUser);
   }
 
   void _onFetchHackathons(FetchHackathons event, Emitter<HackathonState> emit) async {
@@ -71,6 +71,37 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
       };
     } else {
       throw Exception('Failed to load hackathon');
+    }
+  }
+
+  void _onFetchHackathonForUser(FetchHackathonForUser event, Emitter<HackathonState> emit) async {
+    emit(HackathonLoading());
+    try {
+      final hackathons = await _fetchHackathonForUser(event.token);
+      emit(HackathonLoaded(hackathons));
+    } catch (e) {
+      emit(HackathonError(e.toString()));
+    }
+  }
+
+  Future<List<Map<String, String>>> _fetchHackathonForUser(String token) async {
+    final response = await http.get(
+      Uri.parse('${Config.baseUrl}/hackathons/user'), // Update the URL to point to the user-specific endpoint
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body)['data'];
+      return data.map((item) {
+        return {
+          "id": item["id"]?.toString() ?? '',
+          "name": item["name"]?.toString() ?? 'Unknown',
+          "date": item["start_date"]?.toString() ?? 'Unknown',
+          "location": item["location"]?.toString() ?? 'Unknown',
+        };
+      }).toList();
+    } else {
+      throw Exception('Failed to load hackathons');
     }
   }
 
