@@ -21,7 +21,7 @@ import 'package:front/utils/routes.dart';
 import 'package:json_theme/json_theme.dart';
 import 'firebase_options.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:front/services/notification/notification_service.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -61,19 +61,12 @@ Future<void> main() async {
     iOS: DarwinInitializationSettings(),
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  // await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-  const AndroidNotificationDetails androidNotificationDetails =
-  AndroidNotificationDetails('your channel id', 'your channel name',
-      channelDescription: 'your channel description',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'ticker');
-  const NotificationDetails notificationDetails =
-  NotificationDetails(android: androidNotificationDetails);
-  flutterLocalNotificationsPlugin.show(
-      0, 'plain title', 'plain body', notificationDetails,
-      payload: 'item x');
+
+  await NotificationService().initialize();
+
+
   // Fin de l'écran splash
   FlutterNativeSplash.remove();
 
@@ -133,7 +126,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ...Config.blocProviders,
         BlocProvider<NotificationBloc>(
-          create: (context) => NotificationBloc(flutterLocalNotificationsPlugin),
+          create: (context) => NotificationBloc(),
         ),
       ],
       child: MaterialApp(

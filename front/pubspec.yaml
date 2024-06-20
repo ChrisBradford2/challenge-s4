@@ -44,9 +44,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_local_notifications: ^17.1.2
+  flutter_datetime_picker: ^1.5.1
   permission_handler: ^10.2.0
-  intl: ^0.18.1
-  json_theme: ^6.4.0
+  intl: ^0.19.0
+  json_theme: ^6.5.0+1
   equatable: ^2.0.5
   flutter_bloc: ^8.1.5
   flutter_native_splash: ^2.4.0
@@ -82,7 +83,7 @@ flutter:
   assets:
     - flutter_native_splash.yaml
     - assets/theme.json
-  #  - .env remy
+    - .env
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -4,12 +4,11 @@ import '../../services/login/login_bloc.dart';
 import '../../services/login/login_event.dart';
 import '../../services/login/login_state.dart';
 import '../main_screen.dart';
-import '../../services/notification/notification_event.dart';
-import '../../services/notification/notification_bloc.dart';
+import '../../services/notification/notification_service.dart';
 import '../home_screen.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +49,8 @@ class LoginPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   loginBloc.add(LoginButtonPressed(
-                      email: emailController.text,
-                      password: passwordController.text
+                    email: emailController.text,
+                    password: passwordController.text,
                   ));
                 },
                 child: const Text('Login'),
@@ -62,24 +61,18 @@ class LoginPage extends StatelessWidget {
                 },
                 child: const Text('Register'),
               ),
+              const SizedBox(height: 20),
               TextButton(
-                onPressed: () {
-                  // Schedule a notification in 10 seconds
-                  print('pressed');
+                onPressed: () async {
+                  //NotificationService().showNotificationNow();
                   final now = DateTime.now();
                   final scheduledTime = now.add(Duration(seconds: 1));
-                  print({
-                    scheduledTime,
-                    'Reminder',
-                    'This is a scheduled notification'
-                  });
-                  context.read<NotificationBloc>().add(ScheduleNotification(
-                      scheduledTime,
-                      'Reminder',
-                      'This is a scheduled notification'
-                  ));
+                  await NotificationService().showNotificationNow(
+                    title: 'Reminder',
+                    body: 'This is a scheduled notification 2',
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Notification scheduled in 1 seconds')),
+                    SnackBar(content: Text('Notification scheduled in 1 second')),
                   );
                 },
                 child: const Text('Schedule Notification'),
