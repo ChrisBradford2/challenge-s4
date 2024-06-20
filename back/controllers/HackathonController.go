@@ -4,9 +4,10 @@ import (
 	"challenges4/models"
 	"challenges4/services"
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 // CreateHackathon godoc
@@ -123,6 +124,35 @@ func GetHackathons(c *gin.Context, db *gorm.DB) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": hackathons})
+}
+
+func ActivateHackathon(c *gin.Context, db *gorm.DB) {
+	id := c.Param("id")
+
+	var hackathon models.Hackathon
+	if err := db.First(&hackathon, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+		return
+	}
+
+	// Vérifiez si l'utilisateur est un administrateur
+	isAdmin := true //  logique vérification d'administrateur
+
+	if !isAdmin {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Only administrators can activate hackathons"})
+		return
+	}
+
+	// Mettez à jour IsValidated à true et IsActive à true pour activer le hackathon
+	hackathon.IsValidated = true
+	hackathon.IsActive = true
+
+	if err := db.Save(&hackathon).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to activate hackathon"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": hackathon})
 }
 
 func SearchHackathons(c *gin.Context, db *gorm.DB) {

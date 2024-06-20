@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -20,6 +21,7 @@ type Hackathon struct {
 	StartDate       string          `json:"start_date"`
 	EndDate         string          `json:"end_date"`
 	IsActive        bool            `json:"is_active" gorm:"default:0"`
+	IsValidated     bool            `json:"is_validated" default:false`
 	HackathonFiles  []File          `json:"hackathon_files" gorm:"foreignKey:HackathonID"`
 	Participations  []Participation `gorm:"foreignKey:HackathonID"` // Many-to-many relationship with User through Participation
 	NbOfTeams       int             `json:"nb_of_teams" gorm:"default:0"`
@@ -45,6 +47,8 @@ type ParticipationFilter struct {
 }
 
 func (h *Hackathon) AfterCreate(tx *gorm.DB) error {
+	h.IsActive = false
+	h.IsValidated = false
 	for i := 1; i <= h.NbOfTeams; i++ {
 		team := &Team{
 			Name:        fmt.Sprintf("Team %d", i),

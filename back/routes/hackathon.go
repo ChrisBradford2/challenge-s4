@@ -4,9 +4,10 @@ import (
 	"challenges4/config"
 	"challenges4/controllers"
 	middleware "challenges4/middlewares"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 func CreateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
@@ -45,6 +46,12 @@ func RegisterHackathonHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+func ActivateHackathonHandler(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		controllers.ActivateHackathon(c, db)
+	}
+}
+
 // SearchTeammateHandler recherche un coéquipier
 // @Summary Rechercher un coéquipier
 // @Description Recherche un coéquipier pour un hackathon
@@ -76,5 +83,6 @@ func HackathonRoutes(r *gin.Engine, db *gorm.DB) {
 		hackathonGroup.DELETE("/:id", middleware.AuthMiddleware(config.RoleOrganizer), DeleteHackathonHandler(db))
 		hackathonGroup.POST("/:id/register", middleware.AuthMiddleware(config.RoleUser), RegisterHackathonHandler(db))
 		hackathonGroup.POST("/:id/teammate/search", middleware.AuthMiddleware(config.RoleUser), SearchTeammateHandler(db))
+		hackathonGroup.POST("/:id/activate", middleware.AuthMiddleware(config.RoleAdmin), ActivateHackathonHandler(db))
 	}
 }
