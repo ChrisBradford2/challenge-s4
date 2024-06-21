@@ -38,7 +38,7 @@ class JoinTeamPage extends StatelessWidget {
               }
               return ElevatedButton(
                 onPressed: () {
-                  context.read<TeamBloc>().add(JoinTeam(teamId, token));
+                  context.read<TeamBloc>().add(JoinTeam(int.parse(teamId), token));
                 },
                 child: const Text('Join this Team'),
               );

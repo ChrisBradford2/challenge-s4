@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../utils/config.dart';
@@ -21,13 +22,29 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       );
 
       if (response.statusCode == 200) {
-        final message = jsonDecode(response.body)['message'];
-        emit(TeamJoined(message));
+        final responseBody = jsonDecode(response.body);
+        final message = responseBody['message'];
+        final teamId = responseBody['teamId'];
+        emit(TeamJoined(message, teamId));
+      } else if (response.statusCode == 400) {
+        final responseBody = jsonDecode(response.body);
+        final error = responseBody['error'];
+        if (kDebugMode) {
+          print('Error: $error');
+        }
+        emit(TeamError('Failed to join team: $error'));
       } else {
-        final error = jsonDecode(response.body)['error'];
+        final responseBody = jsonDecode(response.body);
+        final error = responseBody['error'];
+        if (kDebugMode) {
+          print('Error: $error');
+        }
         emit(TeamError('Failed to join team: $error'));
       }
     } catch (e) {
+      if (kDebugMode) {
+        print('Exception: $e');
+      }
       emit(TeamError('Failed to join team: $e'));
     }
   }

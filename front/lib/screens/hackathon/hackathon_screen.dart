@@ -55,7 +55,10 @@ class HackathonScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HackathonDetailPage(id: hackathon.id as String, token: token),
+                          builder: (context) => HackathonDetailPage(
+                            id: hackathon.id.toString(), // Convert int to String
+                            token: token,
+                          ),
                         ),
                       );
                     },

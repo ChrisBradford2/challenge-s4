@@ -13,11 +13,12 @@ class TeamLoading extends TeamState {}
 
 class TeamJoined extends TeamState {
   final String message;
+  final int teamId;
 
-  const TeamJoined(this.message);
+  const TeamJoined(this.message, this.teamId);
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [message, teamId];
 }
 
 class TeamError extends TeamState {

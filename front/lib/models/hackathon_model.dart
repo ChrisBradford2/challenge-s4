@@ -7,7 +7,7 @@ class Hackathon {
   final String location;
   final String date;
   final List<Team> teams;
-  final double? distance; // Nullable distance field
+  final double? distance;
 
   Hackathon({
     required this.id,
@@ -16,21 +16,21 @@ class Hackathon {
     required this.location,
     required this.date,
     required this.teams,
-    this.distance, // Nullable distance parameter
+    this.distance,
   });
 
   factory Hackathon.fromJson(Map<String, dynamic> json) {
-    var list = json['teams'] as List? ?? [];
-    List<Team> teamsList = list.map((i) => Team.fromJson(i)).toList();
+    var teamsJson = json['teams'] as List? ?? [];
+    List<Team> teamsList = teamsJson.map((i) => Team.fromJson(i)).toList();
 
     return Hackathon(
-      id: json['id'] ?? 0,
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       location: json['location'] ?? '',
       date: json['start_date'] ?? '',
       teams: teamsList,
-      distance: json['distance'] != null ? json['distance'].toDouble() : null,
+      distance: json['distance']?.toDouble(),
     );
   }
 }

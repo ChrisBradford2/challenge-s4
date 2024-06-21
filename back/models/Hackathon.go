@@ -54,6 +54,7 @@ func (h *Hackathon) AfterCreate(db *gorm.DB) (err error) {
 		team := Team{
 			Name:        fmt.Sprintf("Team %d (Hackathon %d)", i+1, h.ID),
 			HackathonID: &h.ID,
+			NbOfMembers: h.MaxParticipantsPerTeam, // Set the number of members per team
 		}
 		if result := db.Create(&team); result.Error != nil {
 			return result.Error

@@ -8,7 +8,7 @@ abstract class TeamEvent extends Equatable {
 }
 
 class JoinTeam extends TeamEvent {
-  final String teamId;
+  final int teamId;
   final String token;
 
   const JoinTeam(this.teamId, this.token);
