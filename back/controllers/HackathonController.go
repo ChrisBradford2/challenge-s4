@@ -232,7 +232,7 @@ func GetHackathon(c *gin.Context, db *gorm.DB) {
 	hackathonID := c.Param("id")
 	var hackathon models.Hackathon
 
-	if err := db.Preload("Teams").First(&hackathon, hackathonID).Error; err != nil {
+	if err := db.Preload("Teams.Users").First(&hackathon, hackathonID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
 		} else {

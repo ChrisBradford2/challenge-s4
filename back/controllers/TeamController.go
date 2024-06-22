@@ -86,7 +86,7 @@ func (ctrl *TeamController) UpdateTeam(c *gin.Context) {
 // @Router /teams [get]
 func (ctrl *TeamController) GetTeams(c *gin.Context) {
 	var teams []models.Team
-	if result := ctrl.DB.Find(&teams); result.Error != nil {
+	if result := ctrl.DB.Preload("Users").Find(&teams); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
@@ -200,7 +200,10 @@ func (ctrl *TeamController) RegisterToTeam(c *gin.Context) {
 	ctrl.DB.Model(&models.User{}).Where("team_id = ?", team.ID).Count(&teamMemberCount)
 
 	if teamMemberCount >= int64(team.NbOfMembers) {
-		c.JSON(http.StatusBadRequest, "Team is already full")
+		e := map[string]interface{}{
+			"error": "Team is already full",
+		}
+		c.JSON(http.StatusBadRequest, e)
 		return
 	}
 
@@ -277,5 +280,10 @@ func (ctrl *TeamController) LeaveTeam(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, "Successfully left team")
+	response := map[string]interface{}{
+		"message": "Successfully left team",
+		"teamId":  team.ID,
+	}
+
+	c.JSON(http.StatusOK, response)
 }

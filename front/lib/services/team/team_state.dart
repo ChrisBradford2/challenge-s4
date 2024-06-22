@@ -29,3 +29,13 @@ class TeamError extends TeamState {
   @override
   List<Object> get props => [error];
 }
+
+class TeamLeft extends TeamState {
+  final String message;
+  final int teamId;
+
+  const TeamLeft(this.message, this.teamId);
+
+  @override
+  List<Object> get props => [message, teamId];
+}

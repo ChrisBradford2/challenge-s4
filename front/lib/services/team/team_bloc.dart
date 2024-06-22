@@ -9,6 +9,7 @@ import 'team_state.dart';
 class TeamBloc extends Bloc<TeamEvent, TeamState> {
   TeamBloc() : super(TeamInitial()) {
     on<JoinTeam>(_onJoinTeam);
+    on<LeaveTeam>(_onLeaveTeam);
   }
 
   Future<void> _onJoinTeam(JoinTeam event, Emitter<TeamState> emit) async {
@@ -46,6 +47,31 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
         print('Exception: $e');
       }
       emit(TeamError('Failed to join team: $e'));
+    }
+  }
+
+  Future<void> _onLeaveTeam(LeaveTeam event, Emitter<TeamState> emit) async {
+    emit(TeamLoading());
+    try {
+      final response = await http.post(
+        Uri.parse('${Config.baseUrl}/teams/${event.teamId}/leave'),
+        headers: {
+          'Authorization': 'Bearer ${event.token}',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        final message = responseBody['message'];
+        final teamId = responseBody['teamId'];
+        emit(TeamLeft(message, teamId));
+      } else {
+        final responseBody = jsonDecode(response.body);
+        final error = responseBody['error'];
+        emit(TeamError('Failed to leave team: $error'));
+      }
+    } catch (e) {
+      emit(TeamError('Failed to leave team: $e'));
     }
   }
 }

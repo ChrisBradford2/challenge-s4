@@ -42,8 +42,17 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
   void _onFetchSingleHackathons(FetchSingleHackathons event, Emitter<HackathonState> emit) async {
     emit(HackathonLoading());
     try {
+      if (kDebugMode) {
+        print('Fetching single hackathon for ID: ${event.id}');
+      }
       final hackathon = await _fetchSingleHackathon(event.token, event.id);
+      if (kDebugMode) {
+        print('Fetched hackathon: ${hackathon.name}');
+      }
       emit(HackathonLoaded([hackathon]));
+      if (kDebugMode) {
+        print('HackathonLoaded state emitted');
+      }
     } catch (e) {
       emit(HackathonError(e.toString()));
     }
@@ -54,6 +63,11 @@ class HackathonBloc extends Bloc<HackathonEvent, HackathonState> {
       Uri.parse('${Config.baseUrl}/hackathons/$id'),
       headers: {'Authorization': 'Bearer $token'},
     );
+
+    if (kDebugMode) {
+      print('HTTP response status: ${response.statusCode}');
+      print('HTTP response body: ${response.body}');
+    }
 
     if (response.statusCode == 200) {
       dynamic data = jsonDecode(response.body)['data'];

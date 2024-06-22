@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -99,6 +100,9 @@ class HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       onTap: () {
+                        if (kDebugMode) {
+                          print('Navigating to HackathonDetailPage for hackathon ID: ${hackathon.id}');
+                        }
                         Navigator.push(
                           context,
                           MaterialPageRoute(
