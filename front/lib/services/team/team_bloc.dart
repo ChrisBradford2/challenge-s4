@@ -16,7 +16,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     emit(TeamLoading());
     try {
       final response = await http.post(
-        Uri.parse('${Config.baseUrl}/teams/${event.teamId}/join'),
+        Uri.parse('${Config.baseUrl}/teams/${event.teamId}/register'),
         headers: {'Authorization': 'Bearer ${event.token}'},
       );
 

@@ -195,15 +195,11 @@ func (ctrl *TeamController) RegisterToTeam(c *gin.Context) {
 		return
 	}
 
-	// Check if the team is full
 	var teamMemberCount int64
 	ctrl.DB.Model(&models.User{}).Where("team_id = ?", team.ID).Count(&teamMemberCount)
 
 	if teamMemberCount >= int64(team.NbOfMembers) {
-		e := map[string]interface{}{
-			"error": "Team is already full",
-		}
-		c.JSON(http.StatusBadRequest, e)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Team is already full"})
 		return
 	}
 
@@ -213,9 +209,10 @@ func (ctrl *TeamController) RegisterToTeam(c *gin.Context) {
 		return
 	}
 
-	response := map[string]interface{}{
+	response := gin.H{
 		"message": "Successfully registered to team",
 		"teamId":  team.ID,
+		"user":    user,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -267,22 +264,21 @@ func (ctrl *TeamController) LeaveTeam(c *gin.Context) {
 		return
 	}
 
-	// Check if the user is in the target team
 	var teamUser models.User
 	if err := ctrl.DB.Model(&team).Where("id = ?", team.ID).Association("Users").Find(&teamUser, user.ID); err != nil {
 		c.JSON(http.StatusBadRequest, "User is not in the target team")
 		return
 	}
 
-	// Leave the team
 	if err := ctrl.DB.Model(&team).Association("Users").Delete(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, "Failed to leave the team")
 		return
 	}
 
-	response := map[string]interface{}{
+	response := gin.H{
 		"message": "Successfully left team",
 		"teamId":  team.ID,
+		"user":    user,
 	}
 
 	c.JSON(http.StatusOK, response)
