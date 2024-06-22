@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
+import 'package:front/services/team/team_event.dart';
+import 'package:front/services/team/team_state.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../models/user_model.dart';
 import '../../utils/config.dart';
-import 'team_event.dart';
-import 'team_state.dart';
 
 class TeamBloc extends Bloc<TeamEvent, TeamState> {
   TeamBloc() : super(TeamInitial()) {
@@ -16,36 +16,17 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     emit(TeamLoading());
     try {
       final response = await http.post(
-        Uri.parse('${Config.baseUrl}/teams/${event.teamId}/register'),
-        headers: {
-          'Authorization': 'Bearer ${event.token}',
-        },
+        Uri.parse('${Config.baseUrl}/teams/${event.teamId}/join'),
+        headers: {'Authorization': 'Bearer ${event.token}'},
       );
 
       if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final message = responseBody['message'];
-        final teamId = responseBody['teamId'];
-        emit(TeamJoined(message, teamId));
-      } else if (response.statusCode == 400) {
-        final responseBody = jsonDecode(response.body);
-        final error = responseBody['error'];
-        if (kDebugMode) {
-          print('Error: $error');
-        }
-        emit(TeamError('Failed to join team: $error'));
+        final message = jsonDecode(response.body)['message'];
+        emit(TeamJoined(message, event.teamId));
       } else {
-        final responseBody = jsonDecode(response.body);
-        final error = responseBody['error'];
-        if (kDebugMode) {
-          print('Error: $error');
-        }
-        emit(TeamError('Failed to join team: $error'));
+        emit(const TeamError('Failed to join team'));
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Exception: $e');
-      }
       emit(TeamError('Failed to join team: $e'));
     }
   }
@@ -55,23 +36,30 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     try {
       final response = await http.post(
         Uri.parse('${Config.baseUrl}/teams/${event.teamId}/leave'),
-        headers: {
-          'Authorization': 'Bearer ${event.token}',
-        },
+        headers: {'Authorization': 'Bearer ${event.token}'},
       );
 
       if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final message = responseBody['message'];
-        final teamId = responseBody['teamId'];
-        emit(TeamLeft(message, teamId));
+        final message = jsonDecode(response.body)['message'];
+        emit(TeamLeft(message, event.teamId));
       } else {
-        final responseBody = jsonDecode(response.body);
-        final error = responseBody['error'];
-        emit(TeamError('Failed to leave team: $error'));
+        emit(const TeamError('Failed to leave team'));
       }
     } catch (e) {
       emit(TeamError('Failed to leave team: $e'));
+    }
+  }
+
+  Future<User> getUserInfo(String token) async {
+    final response = await http.get(
+      Uri.parse('${Config.baseUrl}/users/me'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      return User.fromJson(jsonDecode(response.body)['data']);
+    } else {
+      throw Exception('Failed to load user info');
     }
   }
 }

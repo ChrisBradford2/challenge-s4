@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 import '../../models/hackathon_model.dart';
+import '../../models/user_model.dart';
 import '../../services/hackathons/hackathon_bloc.dart';
 import '../../services/hackathons/hackathon_event.dart';
 import '../../services/hackathons/hackathon_state.dart';
@@ -46,6 +47,17 @@ class _HackathonDetailPageState extends State<HackathonDetailPage> {
         }
       }
     }
+  }
+
+  void _updateTeamMembers(Hackathon hackathon, int teamId, bool isJoining) {
+    setState(() {
+      final team = hackathon.teams.firstWhere((t) => t.id == teamId);
+      if (isJoining) {
+        team.users!.add(User(id: userId, username: '', lastName: '', firstName: '', profilePicture: '', email: ''));
+      } else {
+        team.users!.removeWhere((user) => user.id == userId);
+      }
+    });
   }
 
   @override
@@ -111,12 +123,14 @@ class _HackathonDetailPageState extends State<HackathonDetailPage> {
                                   ? ElevatedButton(
                                 onPressed: () {
                                   context.read<TeamBloc>().add(LeaveTeam(team.id, widget.token));
+                                  _updateTeamMembers(hackathon, team.id, false);
                                 },
                                 child: const Text('Leave'),
                               )
                                   : ElevatedButton(
                                 onPressed: () {
                                   context.read<TeamBloc>().add(JoinTeam(team.id, widget.token));
+                                  _updateTeamMembers(hackathon, team.id, true);
                                 },
                                 child: const Text('Join'),
                               ),
