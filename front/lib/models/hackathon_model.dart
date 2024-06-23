@@ -1,4 +1,5 @@
 import 'package:front/models/team_model.dart';
+import 'package:front/models/step_model.dart';
 
 class Hackathon {
   final int id;
@@ -7,6 +8,7 @@ class Hackathon {
   final String location;
   final String date;
   final List<Team> teams;
+  final List<Step> steps; // Ajouté
   final double? distance;
 
   Hackathon({
@@ -16,12 +18,16 @@ class Hackathon {
     required this.location,
     required this.date,
     required this.teams,
+    required this.steps, // Ajouté
     this.distance,
   });
 
   factory Hackathon.fromJson(Map<String, dynamic> json) {
     var teamsJson = json['teams'] as List? ?? [];
     List<Team> teamsList = teamsJson.map((i) => Team.fromJson(i)).toList();
+
+    var stepsJson = json['steps'] as List? ?? [];
+    List<Step> stepsList = stepsJson.map((i) => Step.fromJson(i)).toList();
 
     return Hackathon(
       id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
@@ -30,6 +36,7 @@ class Hackathon {
       location: json['location'] ?? '',
       date: json['start_date'] ?? '',
       teams: teamsList,
+      steps: stepsList,
       distance: json['distance']?.toDouble(),
     );
   }

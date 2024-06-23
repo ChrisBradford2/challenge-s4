@@ -7,6 +7,33 @@ definitions:
       error:
         type: string
     type: object
+  models.Evaluation:
+    properties:
+      author:
+        $ref: '#/definitions/models.User'
+      comment:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      note:
+        type: integer
+      team:
+        allOf:
+        - $ref: '#/definitions/models.Team'
+        description: Belongs to Team
+      teamID:
+        description: Foreign key referencing Team.ID
+        type: integer
+      updatedAt:
+        type: string
+      userID:
+        description: Foreign key referencing User.ID, column name as "author_id"
+        type: integer
+    type: object
   models.File:
     properties:
       contentType:
@@ -223,12 +250,61 @@ definitions:
         example: Step 1
         type: string
     type: object
+  models.Submission:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      evaluation:
+        $ref: '#/definitions/models.Evaluation'
+      evaluation_id:
+        type: integer
+      git_link:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      step:
+        $ref: '#/definitions/models.Step'
+      step_id:
+        type: integer
+      team:
+        $ref: '#/definitions/models.Team'
+      team_id:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.SubmissionCreate:
+    properties:
+      evaluation:
+        $ref: '#/definitions/models.Evaluation'
+      evaluation_id:
+        type: integer
+      git_link:
+        type: string
+      status:
+        type: string
+      team:
+        $ref: '#/definitions/models.Team'
+      team_id:
+        type: integer
+    type: object
   models.Team:
     properties:
       createdAt:
         type: string
       deletedAt:
         type: string
+      evaluation:
+        allOf:
+        - $ref: '#/definitions/models.Evaluation'
+        description: Relation avec Evaluation
+      evaluation_id:
+        description: Ajout de l'EvaluationID
+        type: integer
       hackathon:
         $ref: '#/definitions/models.Hackathon'
       hackathon_id:
@@ -664,6 +740,89 @@ paths:
       summary: Update a step
       tags:
       - steps
+  /submissions:
+    post:
+      consumes:
+      - application/json
+      description: Create a new submission for a step
+      parameters:
+      - description: Submission object to create
+        in: body
+        name: submission
+        required: true
+        schema:
+          $ref: '#/definitions/models.SubmissionCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Submission created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.JSONResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Submission'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new submission
+      tags:
+      - submissions
+  /submissions/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file to Google Cloud Storage for a submission
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "201":
+          description: File uploaded successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.JSONResponse'
+            - properties:
+                message:
+                  type: string
+                url:
+                  type: string
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Upload a file for a submission
+      tags:
+      - submissions
   /teams:
     get:
       description: Get all teams

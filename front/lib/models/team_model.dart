@@ -6,6 +6,8 @@ class Team {
   final List<User>? users;
   final int? hackathonId;
   final int? nbOfMembers;
+  final int? evaluationId;
+  final int? stepId;
 
   Team({
     required this.id,
@@ -13,6 +15,8 @@ class Team {
     this.users,
     this.hackathonId,
     this.nbOfMembers,
+    this.evaluationId,
+    this.stepId,
   });
 
   factory Team.fromJson(Map<String, dynamic> json) {
@@ -25,6 +29,8 @@ class Team {
       users: users,
       hackathonId: json['hackathon_id'],
       nbOfMembers: json['nbOfMembers'],
+      evaluationId: json['evaluation_id'],
+      stepId: json['step_id'],
     );
   }
 }
