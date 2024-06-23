@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:uuid/uuid.dart';
@@ -6,13 +7,13 @@ class AutocompleteTextField extends StatefulWidget {
   final String googleApiKey;
   final TextEditingController controller;
 
-  AutocompleteTextField({required this.googleApiKey, required this.controller});
+  const AutocompleteTextField({super.key, required this.googleApiKey, required this.controller});
 
   @override
-  _AutocompleteTextFieldState createState() => _AutocompleteTextFieldState();
+  AutocompleteTextFieldState createState() => AutocompleteTextFieldState();
 }
 
-class _AutocompleteTextFieldState extends State<AutocompleteTextField> {
+class AutocompleteTextFieldState extends State<AutocompleteTextField> {
   List<Prediction> _predictions = [];
   late GoogleMapsPlaces _places;
 
@@ -30,7 +31,7 @@ class _AutocompleteTextFieldState extends State<AutocompleteTextField> {
       return;
     }
 
-    final sessionToken = Uuid().v4();
+    final sessionToken = const Uuid().v4();
     final response = await _places.autocomplete(
       input,
       sessionToken: sessionToken,
@@ -43,7 +44,9 @@ class _AutocompleteTextFieldState extends State<AutocompleteTextField> {
         _predictions = response.predictions;
       });
     } else {
-      print('Error fetching predictions: ${response.errorMessage}');
+      if (kDebugMode) {
+        print('Error fetching predictions: ${response.errorMessage}');
+      }
     }
   }
 
@@ -55,7 +58,9 @@ class _AutocompleteTextFieldState extends State<AutocompleteTextField> {
         _predictions = [];
       });
     } else {
-      print('Error getting place details: ${detail.errorMessage}');
+      if (kDebugMode) {
+        print('Error getting place details: ${detail.errorMessage}');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la récupération des détails du lieu: ${detail.errorMessage}')),
       );

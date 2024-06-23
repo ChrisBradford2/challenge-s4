@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front/utils/config.dart';
@@ -23,10 +24,10 @@ class HackathonDetailPage extends StatefulWidget {
   const HackathonDetailPage({super.key, required this.id, required this.token});
 
   @override
-  _HackathonDetailPageState createState() => _HackathonDetailPageState();
+  HackathonDetailPageState createState() => HackathonDetailPageState();
 }
 
-class _HackathonDetailPageState extends State<HackathonDetailPage> {
+class HackathonDetailPageState extends State<HackathonDetailPage> {
   final Set<int> joinedTeams = <int>{};
   late int userId;
   User? currentUser; // Changed to nullable
@@ -53,9 +54,11 @@ class _HackathonDetailPageState extends State<HackathonDetailPage> {
       headers: {'Authorization': 'Bearer ${widget.token}'},
     );
 
-    print('Fetching current user from $url');
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+    if (kDebugMode) {
+      print('Fetching current user from $url');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
 
     if (response.statusCode == 200) {
       setState(() {

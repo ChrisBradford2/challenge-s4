@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
@@ -65,7 +66,7 @@ class AddHackathonForm extends StatelessWidget {
           GestureDetector(
             onTap: () async {
               try {
-                var sessionToken = Uuid().v4();
+                var sessionToken = const Uuid().v4();
                 Prediction? p = await PlacesAutocomplete.show(
                   context: context,
                   apiKey: googleApiKey,
@@ -85,18 +86,24 @@ class AddHackathonForm extends StatelessWidget {
                   if (detail.status == "OK") {
                     locationController.text = detail.result.formattedAddress ?? 'Address not found';
                   } else {
-                    print('Error getting place details: ${detail.errorMessage}');
+                    if (kDebugMode) {
+                      print('Error getting place details: ${detail.errorMessage}');
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Erreur lors de la récupération des détails du lieu: ${detail.errorMessage}')),
                     );
                   }
                 } else {
-                  print('Prediction is null or has no placeId');
+                  if (kDebugMode) {
+                    print('Prediction is null or has no placeId');
+                  }
                 }
               } catch (e) {
-                print('Error: $e');
+                if (kDebugMode) {
+                  print('Error: $e');
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur lors de la récupération des détails du lieu')),
+                  const SnackBar(content: Text('Erreur lors de la récupération des détails du lieu')),
                 );
               }
             },

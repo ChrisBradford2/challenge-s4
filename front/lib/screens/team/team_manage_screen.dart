@@ -62,10 +62,10 @@ class TeamManagePage extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () => _leaveTeam(context),
-                child: const Text('Leave Team'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red, // Couleur du bouton
                 ),
+                child: const Text('Leave Team'),
               ),
             ],
           ),
