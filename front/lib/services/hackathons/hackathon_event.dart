@@ -35,3 +35,12 @@ class AddHackathon extends HackathonEvent {
   @override
   List<Object> get props => [token, hackathonData];
 }
+
+class FetchHackathonForUser extends HackathonEvent {
+  final String token;
+
+  const FetchHackathonForUser(this.token);
+
+  @override
+  List<Object> get props => [token];
+}

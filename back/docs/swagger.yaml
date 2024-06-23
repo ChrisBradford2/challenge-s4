@@ -63,13 +63,11 @@ definitions:
         type: integer
       is_active:
         type: boolean
-      latitude:
-        type: number
       location:
         type: string
-      longitude:
-        type: number
       max_participants:
+        type: integer
+      max_participants_per_team:
         type: integer
       name:
         type: string
@@ -100,24 +98,17 @@ definitions:
       end_date:
         example: "2021-01-02"
         type: string
-      latitude:
-        example: 0
-        type: number
       location:
         example: Paris
         type: string
-      longitude:
-        example: 0
-        type: number
       max_participants:
         example: 100
+        type: integer
+      max_participants_per_team:
         type: integer
       name:
         example: Hackathon de Paris
         type: string
-      nb_of_teams:
-        example: 0
-        type: integer
       start_date:
         example: "2021-01-01"
         type: string
@@ -136,6 +127,8 @@ definitions:
       isOrganizer:
         description: Indicates if the user is an organizer of the hackathon
         type: boolean
+      team_id:
+        type: integer
       updatedAt:
         type: string
       userID:
@@ -397,12 +390,20 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "201":
           description: Successfully created Hackathon
           schema:
             $ref: '#/definitions/models.Hackathon'
         "400":
           description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
           schema:
             type: string
         "500":
@@ -433,6 +434,70 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete a Hackathon
+      tags:
+      - Hackathons
+    get:
+      description: Get a single Hackathon
+      parameters:
+      - description: Hackathon ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved Hackathon
+          schema:
+            $ref: '#/definitions/models.Hackathon'
+        "404":
+          description: Hackathon not found
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get a single Hackathon
+      tags:
+      - Hackathons
+    put:
+      consumes:
+      - application/json
+      description: Update a Hackathon
+      parameters:
+      - description: Hackathon ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Hackathon object
+        in: body
+        name: hackathon
+        required: true
+        schema:
+          $ref: '#/definitions/models.HackathonCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated Hackathon
+          schema:
+            $ref: '#/definitions/models.Hackathon'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Hackathon not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update a Hackathon
       tags:
       - Hackathons
   /hackathons/{id}/register:
@@ -473,6 +538,33 @@ paths:
       summary: Rechercher un coéquipier
       tags:
       - hackathons
+  /hackathons/user:
+    get:
+      consumes:
+      - application/json
+      description: Get hackathons created by the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of hackathons
+          schema:
+            items:
+              $ref: '#/definitions/models.Hackathon'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get hackathons created by the user
+      tags:
+      - Hackathons
   /steps:
     post:
       consumes:

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/login/login_bloc.dart';
 import '../../services/login/login_event.dart';
 import '../../services/login/login_state.dart';
-import '../main_screen.dart';
+import '../app.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});

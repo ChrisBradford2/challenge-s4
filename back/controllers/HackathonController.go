@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"challenges4/config"
 	"challenges4/models"
 	"challenges4/services"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -19,18 +21,15 @@ import (
 // @Security ApiKeyAuth
 // @Success 201 {object} models.Hackathon "Successfully created Hackathon"
 // @Failure 400 {object} string "Bad request"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 403 {object} string "Forbidden"
 // @Failure 500 {object} string "Internal server error"
 // @Router /hackathons [post]
 func CreateHackathon(c *gin.Context, db *gorm.DB) {
-	var hackathon models.Hackathon
+	var hackathonCreate models.HackathonCreate
 
-	if err := c.ShouldBindJSON(&hackathon); err != nil {
+	if err := c.ShouldBindJSON(&hackathonCreate); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result := db.Create(&hackathon); result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
 
@@ -56,6 +55,23 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	hackathon := models.Hackathon{
+		Name:                   hackathonCreate.Name,
+		Description:            hackathonCreate.Description,
+		Address:                hackathonCreate.Address,
+		Location:               hackathonCreate.Location,
+		MaxParticipants:        hackathonCreate.MaxParticipants,
+		MaxParticipantsPerTeam: hackathonCreate.MaxParticipantsPerTeam,
+		StartDate:              hackathonCreate.StartDate,
+		EndDate:                hackathonCreate.EndDate,
+		CreatedByID:            &userID,
+	}
+
+	if result := db.Create(&hackathon); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
 	participation := models.Participation{
 		HackathonID: hackathon.ID,
 		UserID:      user.ID,
@@ -65,6 +81,14 @@ func CreateHackathon(c *gin.Context, db *gorm.DB) {
 	if createParticipationResult := db.Create(&participation); createParticipationResult.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": createParticipationResult.Error.Error()})
 		return
+	}
+
+	if !config.HasRole(&user, config.RoleOrganizer) {
+		user.Roles |= config.RoleOrganizer
+		if updateRoleResult := db.Save(&user); updateRoleResult.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": updateRoleResult.Error.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"data": hackathon})
@@ -157,17 +181,83 @@ func SearchHackathons(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{"data": hackathons})
 }
 
+// GetHackathonsByUser godoc
+// @Summary Get hackathons created by the user
+// @Description Get hackathons created by the user
+// @Tags Hackathons
+// @Accept  json
+// @Produce  json
+// @Security ApiKeyAuth
+// @Success 200 {array} models.Hackathon "Successfully retrieved list of hackathons"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 500 {object} string "Internal server error"
+// @Router /hackathons/user [get]
+func GetHackathonsByUser(c *gin.Context, db *gorm.DB) {
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
+		return
+	}
+
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
+		return
+	}
+
+	var hackathons []models.Hackathon
+	if result := db.Where("created_by_id = ?", userID).Find(&hackathons); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": hackathons})
+}
+
+// GetHackathon godoc
+// @Summary Get a single Hackathon
+// @Description Get a single Hackathon
+// @Tags Hackathons
+// @Produce  json
+// @Param id path int true "Hackathon ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Hackathon "Successfully retrieved Hackathon"
+// @Failure 404 {object} string "Hackathon not found"
+// @Router /hackathons/{id} [get]
 func GetHackathon(c *gin.Context, db *gorm.DB) {
-	id := c.Param("id")
+	hackathonID := c.Param("id")
 	var hackathon models.Hackathon
-	if result := db.First(&hackathon, id); result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+
+	if err := db.Preload("Teams.Users").First(&hackathon, hackathonID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": hackathon})
 }
 
+// UpdateHackathon godoc
+// @Summary Update a Hackathon
+// @Description Update a Hackathon
+// @Tags Hackathons
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Hackathon ID"
+// @Param hackathon body models.HackathonCreate true "Hackathon object"
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Hackathon "Successfully updated Hackathon"
+// @Failure 400 {object} string "Bad request"
+// @Failure 404 {object} string "Hackathon not found"
+// @Failure 500 {object} string "Internal server error"
+// @Router /hackathons/{id} [put]
 func UpdateHackathon(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
 	var hackathon models.Hackathon

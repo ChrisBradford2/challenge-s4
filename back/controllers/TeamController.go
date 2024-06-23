@@ -86,7 +86,7 @@ func (ctrl *TeamController) UpdateTeam(c *gin.Context) {
 // @Router /teams [get]
 func (ctrl *TeamController) GetTeams(c *gin.Context) {
 	var teams []models.Team
-	if result := ctrl.DB.Find(&teams); result.Error != nil {
+	if result := ctrl.DB.Preload("Users").Find(&teams); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
@@ -190,28 +190,32 @@ func (ctrl *TeamController) RegisterToTeam(c *gin.Context) {
 		return
 	}
 
-	// Check if the user is already in a team
-	var existingTeam models.Team
-	if result := ctrl.DB.Where("id IN (?)", ctrl.DB.Table("team_users").Select("team_id").Where("user_id = ?", user.ID)).First(&existingTeam); result.Error == nil {
+	if user.TeamID != nil {
 		c.JSON(http.StatusBadRequest, "User is already in a team")
 		return
 	}
 
-	// Check if the team is full
 	var teamMemberCount int64
-	ctrl.DB.Model(&models.User{}).Where("id IN (?)", ctrl.DB.Table("team_users").Select("user_id").Where("team_id = ?", team.ID)).Count(&teamMemberCount)
+	ctrl.DB.Model(&models.User{}).Where("team_id = ?", team.ID).Count(&teamMemberCount)
+
 	if teamMemberCount >= int64(team.NbOfMembers) {
-		c.JSON(http.StatusBadRequest, "Team is already full")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Team is already full"})
 		return
 	}
 
-	// Register the user to the team
-	if err := ctrl.DB.Model(&team).Association("Users").Append(&user); err != nil {
+	user.TeamID = &team.ID
+	if err := ctrl.DB.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, "Failed to register user to the team")
 		return
 	}
 
-	c.JSON(http.StatusOK, team)
+	response := gin.H{
+		"message": "Successfully registered to team",
+		"teamId":  team.ID,
+		"user":    user,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // LeaveTeam godoc
@@ -260,18 +264,22 @@ func (ctrl *TeamController) LeaveTeam(c *gin.Context) {
 		return
 	}
 
-	// Check if the user is in the target team
 	var teamUser models.User
 	if err := ctrl.DB.Model(&team).Where("id = ?", team.ID).Association("Users").Find(&teamUser, user.ID); err != nil {
 		c.JSON(http.StatusBadRequest, "User is not in the target team")
 		return
 	}
 
-	// Leave the team
 	if err := ctrl.DB.Model(&team).Association("Users").Delete(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, "Failed to leave the team")
 		return
 	}
 
-	c.JSON(http.StatusOK, "Successfully left team")
+	response := gin.H{
+		"message": "Successfully left team",
+		"teamId":  team.ID,
+		"user":    user,
+	}
+
+	c.JSON(http.StatusOK, response)
 }

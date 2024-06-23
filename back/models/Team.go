@@ -6,5 +6,5 @@ type Team struct {
 	Users       []User     `json:"users"` // Has many Users
 	HackathonID *uint      `json:"hackathon_id"`
 	Hackathon   *Hackathon `gorm:"foreignKey:HackathonID"`
-	NbOfMembers int        `json:"nbOfMembers" gorm:"-"`
+	NbOfMembers int        `json:"nbOfMembers"`
 }
