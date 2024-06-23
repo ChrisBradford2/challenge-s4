@@ -84,13 +84,14 @@ func (ctrl *SubmissionController) CreateSubmission(c *gin.Context) {
 // @Tags submissions
 // @Accept multipart/form-data
 // @Param file formData file true "File to upload"
+// @Param team_id formData int true "Team ID"
 // @Security ApiKeyAuth
 // @Success 201 {object} JSONResponse{message=string,url=string} "File uploaded successfully"
 // @Failure 400 {object} string "Invalid request"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Internal server error"
 // @Router /submissions/upload [post]
-func (ctrl *SubmissionController) UploadSubmissionFile(c *gin.Context, storageService *services.StorageService) {
+func (ctrl *SubmissionController) UploadSubmissionFile(c *gin.Context, db *gorm.DB, storageService *services.StorageService) {
 	token := c.GetHeader("Authorization")
 	if token == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "No authorization token provided"})
@@ -101,10 +102,29 @@ func (ctrl *SubmissionController) UploadSubmissionFile(c *gin.Context, storageSe
 		token = token[7:]
 	}
 
-	userID, err := services.GetUserIDFromToken(token)
+	_, err := services.GetUserIDFromToken(token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized", "details": err.Error()})
 		return
+	}
+
+	teamIDStr := c.PostForm("team_id")
+	teamID, err := strconv.Atoi(teamIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid team ID"})
+		return
+	}
+
+	stepIDStr := c.PostForm("step_id")
+	var stepID *uint
+	if stepIDStr != "" {
+		stepIDUint, err := strconv.Atoi(stepIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid step ID"})
+			return
+		}
+		stepIDUint32 := uint(stepIDUint)
+		stepID = &stepIDUint32
 	}
 
 	file, header, err := c.Request.FormFile("file")
@@ -121,11 +141,11 @@ func (ctrl *SubmissionController) UploadSubmissionFile(c *gin.Context, storageSe
 
 	ctx := context.Background()
 	bucketName := os.Getenv("GCS_BUCKET")
-	objectName := "submissions/" + strconv.Itoa(int(userID)) + "/" + header.Filename
+	objectName := "submissions/" + strconv.Itoa(int(teamID)) + "/" + header.Filename
 
 	wc := storageService.Client.Bucket(bucketName).Object(objectName).NewWriter(ctx)
 	wc.Metadata = map[string]string{
-		"userID":     strconv.Itoa(int(userID)),
+		"teamID":     strconv.Itoa(int(teamID)),
 		"uploadTime": time.Now().Format(time.RFC3339),
 	}
 
@@ -144,7 +164,23 @@ func (ctrl *SubmissionController) UploadSubmissionFile(c *gin.Context, storageSe
 		return
 	}
 
-	c.JSON(http.StatusCreated, JSONResponse{
+	// Save the submission to the database
+	submission := models.Submission{
+		TeamID:  uint(teamID),
+		FileURL: url,
+		Status:  "submitted",
+	}
+
+	if stepID != nil {
+		submission.StepID = stepID
+	}
+
+	if err := db.Create(&submission).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save submission", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
 		"message": "File uploaded successfully",
 		"url":     url,
 	})

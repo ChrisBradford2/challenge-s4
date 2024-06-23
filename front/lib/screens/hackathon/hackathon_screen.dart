@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:front/screens/hackathon/hackathon_teams_screen.dart';
 import '../../components/forms/add_hackathon_form.dart';
 import '../../services/hackathons/hackathon_bloc.dart';
 import '../../services/hackathons/hackathon_event.dart';
@@ -55,10 +56,10 @@ class HackathonScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HackathonDetailPage(
-                            id: hackathon.id.toString(), // Convert int to String
-                            token: token,
-                          ),
+                          builder: (context) => HackathonTeamsPage(
+                              hackathon: hackathon,
+                              token: token
+                          )
                         ),
                       );
                     },

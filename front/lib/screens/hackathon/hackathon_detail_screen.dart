@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front/repositories/team_repository.dart';
 import 'package:front/utils/config.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:http/http.dart' as http;
@@ -106,7 +107,7 @@ class HackathonDetailPageState extends State<HackathonDetailPage> {
         context,
         MaterialPageRoute(
           builder: (context) => BlocProvider(
-            create: (context) => TeamBloc(),
+            create: (context) => TeamBloc(TeamRepository()),
             child: TeamManagePage(
               team: team,
               token: widget.token,
@@ -139,7 +140,7 @@ class HackathonDetailPageState extends State<HackathonDetailPage> {
             value: context.read<HackathonBloc>(),
           ),
           BlocProvider(
-            create: (context) => TeamBloc(),
+            create: (context) => TeamBloc(TeamRepository()),
           ),
         ],
         child: FutureBuilder<void>(

@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 // CreateHackathon godoc
@@ -436,4 +437,69 @@ func SearchParticipants(c *gin.Context, db *gorm.DB) ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+// GetTeamsByHackathon godoc
+// @Summary Get all teams for a specific hackathon
+// @Description Get all teams for a specific hackathon
+// @Tags Teams
+// @Produce json
+// @Security ApiKeyAuth
+// @Param hackathonId path int true "Hackathon ID"
+// @Success 200 {array} models.Team
+// @Failure 400 {object} string "Bad request"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 500 {object} string "Internal server error"
+// @Router /hackathons/{hackathonId}/teams [get]
+func GetTeamsByHackathon(c *gin.Context, db *gorm.DB) {
+	hackathonIdStr := c.Param("id")
+
+	// Convertir l'ID du hackathon en entier
+	hackathonId, err := strconv.Atoi(hackathonIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid hackathon ID"})
+		return
+	}
+
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No authorization token provided"})
+		return
+	}
+
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	userID, err := services.GetUserIDFromToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
+		return
+	}
+
+	var user models.User
+	if err := db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Vérifiez si l'utilisateur est l'organisateur du hackathon
+	var hackathon models.Hackathon
+	if err := db.First(&hackathon, hackathonId).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Hackathon not found"})
+		return
+	}
+
+	if hackathon.CreatedByID != nil && *hackathon.CreatedByID != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden: You are not the organizer of this hackathon"})
+		return
+	}
+
+	var teams []models.Team
+	if err := db.Preload("Users").Preload("Hackathon").Preload("Submission").Where("hackathon_id = ?", hackathonId).Find(&teams).Error; err != nil { // Preload users, hackathon, and submission
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve teams"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": teams})
 }

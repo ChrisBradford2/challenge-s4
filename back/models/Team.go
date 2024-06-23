@@ -9,4 +9,6 @@ type Team struct {
 	NbOfMembers  int         `json:"nbOfMembers"`
 	EvaluationID *uint       `json:"evaluation_id,omitempty"` // Ajout de l'EvaluationID
 	Evaluation   *Evaluation `gorm:"foreignKey:EvaluationID"` // Relation avec Evaluation
+	Submission   *Submission `json:"submission,omitempty"`    // Assuming there is a Submission model
+	SubmissionID uint        `json:"submission_id,omitempty"`
 }

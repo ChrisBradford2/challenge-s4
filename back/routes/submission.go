@@ -17,7 +17,7 @@ func SubmissionRoutes(r *gin.Engine, db *gorm.DB, storageService *services.Stora
 		submissionGroup.Use(middleware.AuthMiddleware(config.RoleUser))
 		submissionGroup.POST("/", submissionController.CreateSubmission)
 		submissionGroup.POST("/upload", func(c *gin.Context) {
-			submissionController.UploadSubmissionFile(c, storageService)
+			submissionController.UploadSubmissionFile(c, db, storageService)
 		})
 	}
 }

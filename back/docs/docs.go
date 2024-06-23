@@ -190,6 +190,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/hackathons/{hackathonId}/teams": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all teams for a specific hackathon",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Get all teams for a specific hackathon",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Hackathon ID",
+                        "name": "hackathonId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Team"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/hackathons/{id}": {
             "get": {
                 "security": [
@@ -641,6 +696,13 @@ const docTemplate = `{
                         "type": "file",
                         "description": "File to upload",
                         "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "team_id",
                         "in": "formData",
                         "required": true
                     }
@@ -1753,6 +1815,9 @@ const docTemplate = `{
                 "evaluation_id": {
                     "type": "integer"
                 },
+                "file_url": {
+                    "type": "string"
+                },
                 "git_link": {
                     "type": "string"
                 },
@@ -1782,14 +1847,20 @@ const docTemplate = `{
         "models.SubmissionCreate": {
             "type": "object",
             "properties": {
-                "evaluation": {
-                    "$ref": "#/definitions/models.Evaluation"
+                "createdAt": {
+                    "type": "string"
                 },
-                "evaluation_id": {
-                    "type": "integer"
+                "deletedAt": {
+                    "type": "string"
+                },
+                "file_url": {
+                    "type": "string"
                 },
                 "git_link": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "status": {
                     "type": "string"
@@ -1799,6 +1870,9 @@ const docTemplate = `{
                 },
                 "team_id": {
                     "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
@@ -1840,6 +1914,17 @@ const docTemplate = `{
                     "example": "Team 1"
                 },
                 "nbOfMembers": {
+                    "type": "integer"
+                },
+                "submission": {
+                    "description": "Assuming there is a Submission model",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Submission"
+                        }
+                    ]
+                },
+                "submission_id": {
                     "type": "integer"
                 },
                 "updatedAt": {

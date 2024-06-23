@@ -4,12 +4,15 @@ import 'package:front/services/team/team_state.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../models/user_model.dart';
+import '../../repositories/team_repository.dart';
 import '../../utils/config.dart';
 
 class TeamBloc extends Bloc<TeamEvent, TeamState> {
-  TeamBloc() : super(TeamInitial()) {
+  final TeamRepository teamRepository;
+  TeamBloc(this.teamRepository) : super(TeamInitial()) {
     on<JoinTeam>(_onJoinTeam);
     on<LeaveTeam>(_onLeaveTeam);
+    on<FetchTeamsForHackathon>(_onFetchTeamsForHackathon);
   }
 
   Future<void> _onJoinTeam(JoinTeam event, Emitter<TeamState> emit) async {
@@ -60,6 +63,19 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       return User.fromJson(jsonDecode(response.body)['data']);
     } else {
       throw Exception('Failed to load user info');
+    }
+  }
+
+  Future<void> _onFetchTeamsForHackathon(
+      FetchTeamsForHackathon event,
+      Emitter<TeamState> emit,
+      ) async {
+    emit(TeamLoading());
+    try {
+      final teams = await teamRepository.fetchTeamsForHackathon(event.hackathonId, event.token);
+      emit(TeamsLoaded(teams));
+    } catch (e) {
+      emit(TeamError(e.toString()));
     }
   }
 }
