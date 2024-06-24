@@ -26,3 +26,13 @@ class LeaveTeam extends TeamEvent {
   @override
   List<Object> get props => [teamId, token];
 }
+
+class FetchTeamsForHackathon extends TeamEvent {
+  final int hackathonId;
+  final String token;
+
+  const FetchTeamsForHackathon(this.hackathonId, this.token);
+
+  @override
+  List<Object> get props => [hackathonId, token];
+}

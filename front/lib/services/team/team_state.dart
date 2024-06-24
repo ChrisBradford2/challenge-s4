@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../models/team_model.dart';
+
 abstract class TeamState extends Equatable {
   const TeamState();
 
@@ -39,3 +41,13 @@ class TeamLeft extends TeamState {
   @override
   List<Object> get props => [message, teamId];
 }
+
+class TeamsLoaded extends TeamState {
+  final List<Team> teams;
+
+  const TeamsLoaded(this.teams);
+
+  @override
+  List<Object> get props => [teams];
+}
+

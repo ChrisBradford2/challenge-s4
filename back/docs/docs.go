@@ -190,6 +190,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/hackathons/{hackathonId}/teams": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all teams for a specific hackathon",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Get all teams for a specific hackathon",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Hackathon ID",
+                        "name": "hackathonId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Team"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/hackathons/{id}": {
             "get": {
                 "security": [
@@ -536,6 +591,152 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Step not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/submissions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new submission for a step",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "Create a new submission",
+                "parameters": [
+                    {
+                        "description": "Submission object to create",
+                        "name": "submission",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SubmissionCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Submission created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.JSONResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Submission"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/submissions/upload": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Uploads a file to Google Cloud Storage for a submission",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "Upload a file for a submission",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "team_id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "File uploaded successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.JSONResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "url": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
@@ -1244,6 +1445,48 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Evaluation": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "note": {
+                    "type": "integer"
+                },
+                "team": {
+                    "description": "Belongs to Team",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Team"
+                        }
+                    ]
+                },
+                "teamID": {
+                    "description": "Foreign key referencing Team.ID",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "description": "Foreign key referencing User.ID, column name as \"author_id\"",
+                    "type": "integer"
+                }
+            }
+        },
         "models.File": {
             "type": "object",
             "properties": {
@@ -1557,6 +1800,82 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Submission": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "evaluation": {
+                    "$ref": "#/definitions/models.Evaluation"
+                },
+                "evaluation_id": {
+                    "type": "integer"
+                },
+                "file_url": {
+                    "type": "string"
+                },
+                "git_link": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "step": {
+                    "$ref": "#/definitions/models.Step"
+                },
+                "step_id": {
+                    "type": "integer"
+                },
+                "team": {
+                    "$ref": "#/definitions/models.Team"
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SubmissionCreate": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "file_url": {
+                    "type": "string"
+                },
+                "git_link": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "team": {
+                    "$ref": "#/definitions/models.Team"
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Team": {
             "type": "object",
             "required": [
@@ -1568,6 +1887,18 @@ const docTemplate = `{
                 },
                 "deletedAt": {
                     "type": "string"
+                },
+                "evaluation": {
+                    "description": "Relation avec Evaluation",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Evaluation"
+                        }
+                    ]
+                },
+                "evaluation_id": {
+                    "description": "Ajout de l'EvaluationID",
+                    "type": "integer"
                 },
                 "hackathon": {
                     "$ref": "#/definitions/models.Hackathon"
@@ -1583,6 +1914,17 @@ const docTemplate = `{
                     "example": "Team 1"
                 },
                 "nbOfMembers": {
+                    "type": "integer"
+                },
+                "submission": {
+                    "description": "Assuming there is a Submission model",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Submission"
+                        }
+                    ]
+                },
+                "submission_id": {
                     "type": "integer"
                 },
                 "updatedAt": {

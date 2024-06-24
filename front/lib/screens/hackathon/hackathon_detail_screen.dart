@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front/repositories/team_repository.dart';
 import 'package:front/utils/config.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:http/http.dart' as http;
@@ -97,18 +98,33 @@ class HackathonDetailPageState extends State<HackathonDetailPage> {
   }
 
   void _navigateToManagePage(BuildContext context, Team team) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BlocProvider(
-          create: (context) => TeamBloc(),
-          child: TeamManagePage(team: team, token: widget.token),
-        ),
-      ),
-    );
+    if (currentHackathon != null) {
+      // Utilisez stepId de l'équipe s'il existe, sinon utilisez la première étape du hackathon s'il y en a
+      final stepId = team.stepId ?? (currentHackathon!.steps.isNotEmpty ? currentHackathon!.steps[0].id : null);
+      final evaluationId = team.evaluationId ?? 0; // S'il existe une évaluation liée, sinon 0
 
-    if (result == 'left') {
-      context.read<HackathonBloc>().add(FetchSingleHackathons(widget.token, widget.id));
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BlocProvider(
+            create: (context) => TeamBloc(TeamRepository()),
+            child: TeamManagePage(
+              team: team,
+              token: widget.token,
+              evaluationId: evaluationId,
+              stepId: stepId ?? 0, // Passez 0 ou une valeur par défaut si stepId est null
+            ),
+          ),
+        ),
+      );
+
+      if (result == 'left') {
+        context.read<HackathonBloc>().add(FetchSingleHackathons(widget.token, widget.id));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hackathon not found.')),
+      );
     }
   }
 
@@ -124,7 +140,7 @@ class HackathonDetailPageState extends State<HackathonDetailPage> {
             value: context.read<HackathonBloc>(),
           ),
           BlocProvider(
-            create: (context) => TeamBloc(),
+            create: (context) => TeamBloc(TeamRepository()),
           ),
         ],
         child: FutureBuilder<void>(
@@ -195,6 +211,7 @@ class HackathonDetailPageState extends State<HackathonDetailPage> {
                                 itemBuilder: (context, index) {
                                   final team = hackathon.teams[index];
                                   final bool isJoined = joinedTeams.contains(team.id);
+
                                   return ListTile(
                                     title: Text(team.name),
                                     subtitle: Column(
