@@ -135,8 +135,8 @@ func main() {
 	docs.SwaggerInfo.Description = "API for the Kiwi Collective project."
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Host = "localhost"
-	docs.SwaggerInfo.Schemes = []string{"https", "http"}
+	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Schemes = []string{"http"}
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Setup routes
