@@ -1,15 +1,15 @@
+// main.dart
 import 'dart:convert';
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:front/screens/admin/admin_login_screen.dart';
 import 'package:front/screens/app.dart';
 import 'package:front/screens/login/login_screen.dart';
 import 'package:front/screens/profile/profile_screen.dart';
@@ -18,58 +18,44 @@ import 'package:front/services/logout/logout_state.dart';
 import 'package:front/utils/config.dart';
 import 'package:front/utils/routes.dart';
 import 'package:json_theme/json_theme.dart';
+
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = MyHttpOverrides();
+
   await dotenv.load(fileName: ".env");
 
-  try {
-    if (!kIsWeb) {
-      if (kDebugMode) {
-        print(Platform.operatingSystem);
-      }
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print('Platform not available: $e');
-    }
-  }
-
-  // Splash persistance jusqu'à l'initialisation
+  // Splash persistence until initialization
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Gestion des tâches
+  // Handle initialization tasks
   await Future.delayed(const Duration(seconds: 2));
 
-  // Fin de l'écran splash
+  // End the splash screen
   FlutterNativeSplash.remove();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Chargement du thème depuis un fichier JSON
+  // Load theme from JSON file
   final themeStr = await rootBundle.loadString('assets/theme.json');
   final theme = ThemeDecoder.decodeThemeData(jsonDecode(themeStr))!;
 
-  // Configuration Firebase pour les émulateurs en mode debug
-  if (kDebugMode) {
-    Config().configureFirebaseEmulators();
+  // Configure Firebase for emulators in debug mode (only for mobile and desktop platforms)
+  if (kDebugMode && !kIsWeb) {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows) {
+      Config().configureFirebaseEmulators();
+    }
   }
 
-  // Évite d'avoir du cache
+  // Avoid cache
   await FirebaseFirestore.instance.terminate();
   await FirebaseFirestore.instance.clearPersistence();
 
   runApp(MyApp(theme: theme));
-}
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-  }
 }
 
 class MyApp extends StatelessWidget {
@@ -123,9 +109,10 @@ class MyApp extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
-            return MainScreen(token: snapshot.data!.uid); // Utilise MainScreen avec le token
+            return MainScreen(token: snapshot.data!.uid); // Use MainScreen with the token
           } else {
-            return const LoginPage();
+            // Redirect to AdminLoginPage if on web, else to LoginPage
+            return kIsWeb ? const AdminLoginPage() : const LoginPage();
           }
         }
         return const CircularProgressIndicator();

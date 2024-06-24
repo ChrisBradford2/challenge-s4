@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 
+import '../models/user_model.dart';
 import '../utils/config.dart';
 
 class AuthenticationService {
@@ -25,8 +26,7 @@ class AuthenticationService {
 
       if (response.statusCode == 200) {
         if (kDebugMode) {
-          print('Login successfull, token: ${jsonDecode(
-              response.body)['token']}');
+          print('Login successful, token: ${jsonDecode(response.body)['token']}');
         }
         _token = jsonDecode(response.body)['token'];
         return true;
@@ -72,7 +72,7 @@ class AuthenticationService {
     var response = await request.send();
     if (response.statusCode == 201) {
       if (kDebugMode) {
-        print('Registration successfull');
+        print('Registration successful');
       }
     } else {
       if (kDebugMode) {
@@ -86,5 +86,28 @@ class AuthenticationService {
   Future<bool> logout() async {
     _token = '';
     return true;
+  }
+
+  Future<User?> getUserDetails(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${Config.baseUrl}/user/me'),
+        headers: <String, String>{
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return User.fromJson(responseBody);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching user details: $e');
+      }
+      return null;
+    }
   }
 }
