@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 # Production image
 FROM golang:1.22.1

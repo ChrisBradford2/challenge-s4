@@ -1,3 +1,4 @@
+// main.dart
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +20,9 @@ import 'package:front/utils/routes.dart';
 import 'package:json_theme/json_theme.dart';
 
 import 'firebase_options.dart';
-import 'platform_overrides.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
-  // Setup platform-specific configurations
-  setupPlatformSpecific();
 
   await dotenv.load(fileName: ".env");
 
